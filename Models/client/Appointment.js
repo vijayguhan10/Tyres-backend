@@ -22,13 +22,17 @@ const AppointmentSchema = new mongoose.Schema(
     },
     tyreInfo: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "TyreInfo",
+      ref: "ClientOrder",
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["Pending", "Completed", "issues"],
+      default: "Pending",
       required: true,
     },
   },
   { timestamps: true }
 );
-
 const Appointment = mongoose.model("Appointment", AppointmentSchema);
-
 module.exports = Appointment;

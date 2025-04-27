@@ -4,7 +4,7 @@ const OrderSchema = new mongoose.Schema(
   {
     tyreInfo: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "TyreInfo",
+      ref: "ClientOrder",
       required: true,
     },
     addressId: {
