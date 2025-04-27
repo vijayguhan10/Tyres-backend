@@ -68,11 +68,16 @@ const deleteTyre = async (req, res) => {
   }
 
   try {
-    const tyre = await Tyre.findByIdAndDelete(id);
+    const tyre = await Tyre.findById(id);
+
     if (!tyre) {
       return res.status(404).json({ message: "Tyre not found" });
     }
-    res.status(200).json({ message: "Tyre deleted successfully" });
+
+    tyre.deleted = true;
+    await tyre.save();
+
+    res.status(200).json({ message: "Tyre marked as deleted", tyre });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

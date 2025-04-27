@@ -1,17 +1,28 @@
 const Mapping = require("../../Models/admin/Mapping");
 const Shop = require("../../Models/shop/Shop");
+const ClientOrder = require("../../Models/client/OrderTyre");
 
 // Create a new Mapping
 const createMapping = async (req, res) => {
   try {
+    const { shopId, orderId } = req.body;
+
+    // Validate ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(shopId)) {
+      return res.status(400).json({ message: "Invalid shop ID" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return res.status(400).json({ message: "Invalid order ID" });
+    }
+
     // Check if shopId exists
-    const shopExists = await Shop.findById(req.body.shopId);
+    const shopExists = await Shop.findById(shopId);
     if (!shopExists) {
       return res.status(400).json({ message: "Shop not found" });
     }
 
     // Check if orderId exists
-    const orderExists = await Order.findById(req.body.orderId);
+    const orderExists = await ClientOrder.findById(orderId);
     if (!orderExists) {
       return res.status(400).json({ message: "Order not found" });
     }

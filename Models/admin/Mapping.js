@@ -9,7 +9,7 @@ const MappingSchema = new mongoose.Schema(
     },
     orderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Order",
+      ref: "ClientOrder",
       required: true,
     },
   },
