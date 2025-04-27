@@ -5,7 +5,6 @@ const {
   comparePassword,
   verifyToken,
 } = require("../Auth/auth");
-
 const createUser = async (req, res) => {
   const { name, email, password, role } = req.body;
 
@@ -32,7 +31,6 @@ const createUser = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
-
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -53,13 +51,11 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
-
 const authenticateJWT = async (req, res, next) => {
   const token = req.cookies.token;
   if (!token) {
     return res.status(403).json({ message: "Access denied" });
   }
-
   try {
     const decoded = await verifyToken(token);
     req.user = decoded;
@@ -68,7 +64,6 @@ const authenticateJWT = async (req, res, next) => {
     return res.status(error.status || 403).json({ message: error.message });
   }
 };
-
 module.exports = {
   createUser,
   loginUser,

@@ -19,10 +19,15 @@ const TyreInfoSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    status: {
+      type: String,
+      enum: ["Pending", "Completed", "issues"],
+      default: "Pending",
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-const TyreInfo = mongoose.model("TyreInfo", TyreInfoSchema);
-
+const TyreInfo = mongoose.model("ClientOrder", TyreInfoSchema);
 module.exports = TyreInfo;
