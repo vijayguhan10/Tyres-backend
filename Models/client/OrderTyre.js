@@ -7,17 +7,15 @@ const TyreInfoSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    tyreBrand: {
-      type: String,
+    tyreinfo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "addtyre",
       required: true,
     },
-    size: {
-      type: String,
+    deleted: {
+      type: Boolean,
       required: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
+      default: false,
     },
     status: {
       type: String,

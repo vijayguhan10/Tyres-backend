@@ -32,7 +32,7 @@ const createAppointment = async (req, res) => {
 const getAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find().populate(
-      "userId addressId clientorders"
+      "userId addressId tyreInfo"
     );
     res.status(200).json({ appointments });
   } catch (error) {

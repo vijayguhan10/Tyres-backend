@@ -55,6 +55,6 @@ const TyreSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Tyre = mongoose.model("Tyre", TyreSchema);
+const Tyre = mongoose.model("addtyre", TyreSchema);
 
 module.exports = Tyre;
