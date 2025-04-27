@@ -51,6 +51,10 @@ const TyreSchema = new mongoose.Schema(
     warranty: {
       type: String,
     },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

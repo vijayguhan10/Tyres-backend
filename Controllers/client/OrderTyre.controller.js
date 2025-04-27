@@ -30,7 +30,7 @@ const getTyreInfos = async (req, res) => {
   try {
     const tyreInfos = await TyreInfo.find()
       .populate("userId", "name email")
-      .populate("addtyre");
+      .populate("tyreinfo");
     res.status(200).json(tyreInfos);
   } catch (error) {
     console.log("error : ",error);
