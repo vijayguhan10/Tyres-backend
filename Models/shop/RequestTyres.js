@@ -28,6 +28,12 @@ const TyreRequestSchema = new mongoose.Schema(
       default: "Pending",
       required: true,
     },
+    deleterequest: {
+      type: Boolean,
+      enum: [true, false],
+      required: true,
+      default: false,
+    },
     comments: {
       type: String,
       default: "",

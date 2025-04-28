@@ -5,10 +5,9 @@ const ConnectDb = require("./Config/Connect");
 const userRoutes = require("./router/User.route");
 const AddressRoutes = require("./router/Address.route");
 const OrderTyres_clients = require("./router/client/Index.route");
-
-const OrderTyres_clients = require("./router/client/Order.route");
 const AdminAddtyreRoutes = require("./router/admin/Addtyre.route");
 const AdminMappingRoutes = require("./router/admin/Mapping.route");
+const ShopRouter = require("./router/shop/Index.route");
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -20,7 +19,8 @@ app.use("/api/client", OrderTyres_clients);
 
 app.use("/api/admin/addtyre", AdminAddtyreRoutes);
 app.use("/api/admin/mapping", AdminMappingRoutes);
-console.log("h")
+app.use("/api", ShopRouter);
+console.log("h");
 ConnectDb();
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
