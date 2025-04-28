@@ -2,6 +2,7 @@ const axios = require("axios");
 
 async function getCoordinates(pincode) {
   try {
+    console.log("api call form the opencage api");
     const apiKey = "a4c137f955eb488cb8d7df25d7a9b770";
     const response = await axios.get(
       `https://api.opencagedata.com/geocode/v1/json?q=${pincode}&key=${apiKey}`
@@ -20,7 +21,7 @@ async function getCoordinates(pincode) {
   }
 }
 function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371; 
+  const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
 
@@ -32,7 +33,7 @@ function haversine(lat1, lon1, lat2, lon2) {
       Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; 
+  return R * c;
 }
 
 async function calculateDistance(pincode1, pincode2) {
