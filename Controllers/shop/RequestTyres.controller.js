@@ -1,14 +1,19 @@
 const TyreRequest = require("../../Models/shop/RequestTyres");
 const createTyreRequest = async (req, res) => {
-  const { tyreBrand, size, quantity, comments } = req.body;
+  const { tyreBrand, size, quantity, comments,addressid } = req.body;
 
   try {
+  
+    if (!addressid) {
+      return res.status(404).json({ message: "Address not found" });
+    }
     const newRequest = new TyreRequest({
       userId: req.user.userId,
       tyreBrand,
       size,
       quantity,
       comments,
+      addressid,
     });
 
     const savedRequest = await newRequest.save();
@@ -19,7 +24,9 @@ const createTyreRequest = async (req, res) => {
 };
 const getTyreRequests = async (req, res) => {
   try {
-    const tyreRequests = await TyreRequest.find({ userId: req.user.userId });
+    const tyreRequests = await TyreRequest.find({
+      userId: req.user.userId,
+    }).populate("addressid");
     res.status(200).json(tyreRequests);
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -28,7 +35,9 @@ const getTyreRequests = async (req, res) => {
 
 const getTyreRequestById = async (req, res) => {
   try {
-    const tyreRequest = await TyreRequest.findById(req.params.id);
+    const tyreRequest = await TyreRequest.findById(req.params.id).populate(
+      "addressid"
+    );
 
     if (!tyreRequest) {
       return res.status(404).json({ message: "Tyre request not found" });
@@ -66,6 +75,7 @@ const updateTyreRequest = async (req, res) => {
 };
 
 const deleteTyreRequest = async (req, res) => {
+  console.log("Hitting the endpoint with the object id of : ", req.params.id);
   try {
     const tyreRequest = await TyreRequest.findById(req.params.id);
     if (!tyreRequest) {
@@ -75,10 +85,12 @@ const deleteTyreRequest = async (req, res) => {
     if (tyreRequest.userId.toString() !== req.user.userId) {
       return res.status(403).json({ message: "Unauthorized" });
     }
-    if (tyreRequest.status == "pending") {
+    if (tyreRequest.status === "Pending") {
       tyreRequest.deleterequest = true;
     } else {
-      return res.status(400).json({ message: "Delete request not valid" });
+      return res.status(400).json({
+        message: "request approved not possible to decline contact owner",
+      });
     }
     const updatedRequest = await tyreRequest.save();
     res.status(200).json(updatedRequest);
