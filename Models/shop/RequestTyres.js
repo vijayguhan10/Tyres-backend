@@ -22,11 +22,22 @@ const TyreRequestSchema = new mongoose.Schema(
       required: true,
       min: 1,
     },
+    addressid: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Address",
+      required: true,
+    },
     status: {
       type: String,
       enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
       required: true,
+    },
+    deleterequest: {
+      type: Boolean,
+      enum: [true, false],
+      required: true,
+      default: false,
     },
     comments: {
       type: String,
