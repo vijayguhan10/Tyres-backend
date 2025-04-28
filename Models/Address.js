@@ -27,10 +27,14 @@ const AddressSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    deleted: {
+      type: Boolean,
+      required: true,
+      default: true,
+      enum: [true, false],
+    },
   },
   { timestamps: true }
 );
-
 const Address = mongoose.model("Address", AddressSchema);
-
 module.exports = Address;

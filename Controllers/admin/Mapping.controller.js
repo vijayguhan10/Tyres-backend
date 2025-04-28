@@ -1,8 +1,6 @@
 const Mapping = require("../../Models/admin/Mapping");
 const Shop = require("../../Models/shop/Shop");
 const ClientOrder = require("../../Models/client/OrderTyre");
-
-// Create a new Mapping
 const createMapping = async (req, res) => {
   try {
     const { shopId, orderId } = req.body;
@@ -14,40 +12,30 @@ const createMapping = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return res.status(400).json({ message: "Invalid order ID" });
     }
-
-    // Check if shopId exists
     const shopExists = await Shop.findById(shopId);
     if (!shopExists) {
       return res.status(400).json({ message: "Shop not found" });
     }
-
-    // Check if orderId exists
     const orderExists = await ClientOrder.findById(orderId);
     if (!orderExists) {
       return res.status(400).json({ message: "Order not found" });
     }
-
-    // Create the mapping
     const mapping = await Mapping.create(req.body);
     res.status(201).json(mapping);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
-
-// Get all Mappings
 const getAllMappings = async (req, res) => {
   try {
     const mappings = await Mapping.find()
-      .populate("shopId") // Optional: populate shop details
-      .populate("orderId"); // Optional: populate order details
+      .populate("shopId")
+      .populate("orderId");
     res.status(200).json(mappings);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Get a Mapping by ID
 const getMappingById = async (req, res) => {
   try {
     const mapping = await Mapping.findById(req.params.id)
@@ -61,8 +49,6 @@ const getMappingById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Get all Mappings for a specific shop
 const getMappingsByShopId = async (req, res) => {
   try {
     const mappings = await Mapping.find({ shopId: req.params.shopId })
@@ -99,3 +85,4 @@ module.exports = {
   getMappingsByShopId,
   deleteMapping,
 };
+

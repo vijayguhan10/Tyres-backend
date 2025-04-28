@@ -37,7 +37,6 @@ const getTyreInfos = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 const getTyreInfoById = async (req, res) => {
   try {
     console.log("order id individual : ", req.params.id);
