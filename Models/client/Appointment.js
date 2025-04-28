@@ -20,7 +20,7 @@ const AppointmentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    tyreInfo: {
+    orderinfo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ClientOrder",
       required: true,

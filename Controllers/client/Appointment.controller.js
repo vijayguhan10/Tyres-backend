@@ -1,24 +1,22 @@
 const Appointment = require("../../Models/client/Appointment");
-const { verifyToken } = require("../../Auth/auth");
 const createAppointment = async (req, res) => {
   try {
     const token = req.cookies.token;
     if (!token) return res.status(401).json({ message: "No token provided" });
 
-    const decoded = await verifyToken(token);
-    if (decoded.role !== "client")
+    if (req.user.role !== "client")
       return res.status(403).json({ message: "Unauthorized role" });
-    const { addressId, time, date, tyreInfo } = req.body;
-    if (!addressId || !time || !date || !tyreInfo) {
+    const { addressId, time, date, orderinfo } = req.body;
+    if (!addressId || !time || !date || !orderinfo) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const appointment = await Appointment.create({
-      userId: decoded.userId,
+      userId: req.user.userId,
       addressId,
       time,
       date,
-      tyreInfo,
+      orderinfo,
     });
 
     res.status(201).json({ message: "Appointment created", appointment });
@@ -32,7 +30,7 @@ const createAppointment = async (req, res) => {
 const getAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find().populate(
-      "userId addressId tyreInfo"
+      "userId addressId orderinfo"
     );
     res.status(200).json({ appointments });
   } catch (error) {
@@ -43,7 +41,7 @@ const getAppointmentById = async (req, res) => {
   try {
     const { id } = req.params;
     const appointment = await Appointment.findById(id)
-      .populate("userId addressId tyreInfo")
+      .populate("userId addressId orderinfo")
       .populate({
         path: "userId",
         select: "email name",

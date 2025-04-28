@@ -1,8 +1,12 @@
 const mongoose = require("mongoose");
 const Address = require("../Address");
-
 const ShopSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     name: {
       type: String,
       required: true,
@@ -15,13 +19,17 @@ const ShopSchema = new mongoose.Schema(
     orders: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "RequestOrder", 
+        ref: "Appointment",
+      },
+    ],
+    TyresRequested: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "TyreRequest",
       },
     ],
   },
   { timestamps: true }
 );
-
 const Shop = mongoose.model("Shop", ShopSchema);
-
 module.exports = Shop;

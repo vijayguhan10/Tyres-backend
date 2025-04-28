@@ -16,7 +16,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/address", AddressRoutes);
 app.use("/api/client", OrderTyres_clients);
 app.use("/api/admin", AdminRouter);
-app.use("/api/shops", ShopRouter);
+app.use("/api", ShopRouter);
 
 console.log("h");
 ConnectDb();

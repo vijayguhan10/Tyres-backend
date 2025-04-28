@@ -4,7 +4,35 @@ const Tyre = require("../../Models/admin/Addtyre");
 // POST /api/tyres
 const createTyre = async (req, res) => {
   try {
-    const tyre = await Tyre.create(req.body);
+    const {
+      brand,
+      model,
+      type,
+      vehicleType,
+      loadIndex,
+      speedRating,
+      price,
+      description,
+      images,
+      warranty,
+      stock,
+    } = req.body;
+
+    const newTyre = new Tyre({
+      brand,
+      model,
+      type,
+      vehicleType,
+      loadIndex,
+      speedRating,
+      price,
+      description,
+      images,
+      warranty,
+      stock,
+    });
+
+    const tyre = await newTyre.save();
     res.status(201).json(tyre);
   } catch (error) {
     res.status(400).json({ message: error.message });
