@@ -7,6 +7,11 @@ const AddressSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    role: {
+      type: String,
+      enum: ["client", "admin", "fitment-center"],
+      required: true,
+    },
     street: {
       type: String,
       required: true,

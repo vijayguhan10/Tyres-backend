@@ -2,7 +2,19 @@ const Address = require("../Models/Address");
 
 const createAddress = async (req, res) => {
   try {
-    const address = await Address.create(req.body);
+    const { street, city, state, postalCode, country } = req.body;
+    const { userId, role } = req.user;
+
+    const address = await Address.create({
+      userId,
+      role,
+      street,
+      city,
+      state,
+      postalCode,
+      country,
+    });
+
     res.status(201).json(address);
   } catch (error) {
     res.status(400).json({ message: error.message });

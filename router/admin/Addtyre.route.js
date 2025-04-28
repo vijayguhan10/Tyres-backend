@@ -6,23 +6,22 @@ const {
   updateTyre,
   deleteTyre,
 } = require("../../Controllers/admin/Addtyre.controller");
-const { authenticateJWT } = require("../../Controllers/User.controller");
 
 const router = express.Router();
 
 // Create a new tyre
-router.post("/", authenticateJWT, createTyre);
+router.post("/", createTyre);
 
 // Get all tyres
-router.get("/", authenticateJWT, getAllTyres);
+router.get("/", getAllTyres);
 
 // Get a single tyre by ID
-router.get("/:id", authenticateJWT,  getTyreById);
+router.get("/:id", getTyreById);
 
 // Update a tyre
-router.put("/:id", authenticateJWT, updateTyre);
+router.put("/:id", updateTyre);
 
 // Delete a tyre
-router.delete("/:id", authenticateJWT, deleteTyre);
+router.delete("/:id", deleteTyre);
 
 module.exports = router;

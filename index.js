@@ -5,21 +5,19 @@ const ConnectDb = require("./Config/Connect");
 const userRoutes = require("./router/User.route");
 const AddressRoutes = require("./router/Address.route");
 const OrderTyres_clients = require("./router/client/Index.route");
-const AdminAddtyreRoutes = require("./router/admin/Addtyre.route");
-const AdminMappingRoutes = require("./router/admin/Mapping.route");
+const AdminRouter = require("./router/admin/Index.route");
 const ShopRouter = require("./router/shop/Index.route");
 dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-// console.log("");
+
 app.use("/api/users", userRoutes);
 app.use("/api/address", AddressRoutes);
 app.use("/api/client", OrderTyres_clients);
+app.use("/api/admin", AdminRouter);
+app.use("/api/shops", ShopRouter);
 
-app.use("/api/admin/addtyre", AdminAddtyreRoutes);
-app.use("/api/admin/mapping", AdminMappingRoutes);
-app.use("/api", ShopRouter);
 console.log("h");
 ConnectDb();
 const PORT = process.env.PORT || 5000;

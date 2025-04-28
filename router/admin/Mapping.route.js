@@ -6,23 +6,22 @@ const {
   getMappingsByShopId,
   deleteMapping,
 } = require("../../Controllers/admin/Mapping.controller");
-const { authenticateJWT } = require("../../Controllers/User.controller");
 
 const router = express.Router();
 
 // Create a new mapping
-router.post("/", authenticateJWT, createMapping);
+router.post("/", createMapping);
 
 // Get all mappings
-router.get("/", authenticateJWT, getAllMappings);
+router.get("/", getAllMappings);
 
 // Get a single mapping by ID
-router.get("/:id", authenticateJWT, getMappingById);
+router.get("/:id", getMappingById);
 
 // Get mappings by specific shopId
-router.get("/shop/:shopId", authenticateJWT, getMappingsByShopId);
+router.get("/shop/:shopId", getMappingsByShopId);
 
 // Delete a mapping
-router.delete("/:id", authenticateJWT, deleteMapping);
+router.delete("/:id", deleteMapping);
 
 module.exports = router;

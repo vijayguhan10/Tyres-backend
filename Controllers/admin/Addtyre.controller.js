@@ -5,9 +5,6 @@ const Tyre = require("../../Models/admin/Addtyre");
 const createTyre = async (req, res) => {
   try {
     const tyre = await Tyre.create(req.body);
-    const newtyre=new Tyre({
-      
-    })
     res.status(201).json(tyre);
   } catch (error) {
     res.status(400).json({ message: error.message });

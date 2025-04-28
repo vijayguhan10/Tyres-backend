@@ -14,10 +14,10 @@ const {
   deleteAppointment,
 } = require("../../Controllers/client/Appointment.controller");
 const router = express.Router();
-const { authenticateJWT } = require("../../Controllers/User.controller");
-router.post("/bookappointment", authenticateJWT, createAppointment);
-router.get("/singleappointment", authenticateJWT, getAppointments);
-router.get("/appointments/:id", authenticateJWT, getAppointmentById);
-router.put("/appointments/:id", authenticateJWT, updateAppointment);
-router.delete("/appointments/:id", authenticateJWT, deleteAppointment);
+
+router.post("/bookappointment", createAppointment);
+router.get("/singleappointment", getAppointments);
+router.get("/appointments/:id", getAppointmentById);
+router.put("/appointments/:id", updateAppointment);
+router.delete("/appointments/:id", deleteAppointment);
 module.exports = router;
