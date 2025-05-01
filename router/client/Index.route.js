@@ -8,6 +8,6 @@ const { rolecheck } = require("../../Utils/Role");
 
 route.use("/", authenticateJWT, rolecheck("client"), appointmentRoutes);
 route.use("/order-client", authenticateJWT, rolecheck("client"), orderRoutes);
-route.use("/addvehicle", authenticateJWT, rolecheck("client"), addVehicleRoutes);
+route.use("/vehicle", authenticateJWT, rolecheck("client"), addVehicleRoutes);
 
 module.exports = route;

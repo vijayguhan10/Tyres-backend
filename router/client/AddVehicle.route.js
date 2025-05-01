@@ -10,18 +10,18 @@ const {
 const router = express.Router();
 
 // Create a new vehicle
-router.post("/", createVehicle);
+router.post("/addvehicle", createVehicle);
 
 // Get all vehicles
-router.get("/", getAllVehicles);
+router.get("/getallvehicles", getAllVehicles);
 
 // Get vehicle by ID
-router.get("/:id", getVehicleById);
+router.get("/getvehiclebyid/:id", getVehicleById);
 
 // Update vehicle by ID
-router.put("/:id", updateVehicle);
+router.put("/updatevehicle/:id", updateVehicle);
 
 // Delete vehicle by ID
-router.delete("/:id", deleteVehicle);
+router.delete("/deletevehicle/:id", deleteVehicle);
 
 module.exports = router;
