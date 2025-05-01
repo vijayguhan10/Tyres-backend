@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const AddVehicleSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     registrationNumber: {
       type: String,
       required: true,
@@ -11,7 +16,6 @@ const AddVehicleSchema = new mongoose.Schema(
     vehicleType: {
       type: String,
       required: true,
-      enum: ["bike", "car", "commercial"],
     },
     vehicleModel: {
       type: String,

@@ -4,12 +4,14 @@ const AddVehicle = require("../../Models/client/AddVehicle");
 const createVehicle = async (req, res) => {
   try {
     const { registrationNumber, vehicleType, vehicleModel } = req.body;
+    const { userId } = req.user;
 
     const newVehicle = new AddVehicle({
+      userId,
       registrationNumber,
       vehicleType,
       vehicleModel,
-      servicesDone: 0, // explicitly setting to default, optional
+      servicesDone: 0,
     });
 
     const savedVehicle = await newVehicle.save();
