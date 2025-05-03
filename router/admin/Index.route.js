@@ -7,7 +7,7 @@ const { rolecheck } = require("../../Utils/Role");
 
 const route = express.Router();
 
-route.use("/addtyre", authenticateJWT, rolecheck("admin"), AddtyreRoutes);
+route.use("/addtyre", authenticateJWT, AddtyreRoutes);
 route.use("/mapping", authenticateJWT, rolecheck("admin"), MappingRoutes);
 route.use("/assign", authenticateJWT, rolecheck("admin"), AssignShops);
 
