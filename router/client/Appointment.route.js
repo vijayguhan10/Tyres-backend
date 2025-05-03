@@ -1,12 +1,5 @@
 const express = require("express");
 const {
-  createTyreInfo,
-  getTyreInfos,
-  getTyreInfoById,
-  updateTyreInfo,
-  deleteTyreInfo,
-} = require("../../Controllers/client/OrderTyre.controller");
-const {
   createAppointment,
   getAppointments,
   getAppointmentById,
