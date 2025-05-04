@@ -1,4 +1,26 @@
 const mongoose = require("mongoose");
+const addtyre = require("../../Models/admin/Addtyre");
+
+const OrderItemSchema = new mongoose.Schema(
+  {
+    tyre: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "addtyre",
+      required: true,
+    },
+    size: {
+      type: String,
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1,
+      default: 1
+    },
+  },
+  { _id: false }
+);
 
 const TyreInfoSchema = new mongoose.Schema(
   {
@@ -7,20 +29,16 @@ const TyreInfoSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    tyreinfo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "addtyre",
+    orderItems: [OrderItemSchema],
+    status: {
+      type: String,
+      enum: ["Pending", "Completed"],
+      default: "Pending",
       required: true,
     },
     deleted: {
       type: Boolean,
-      required: true,
       default: false,
-    },
-    status: {
-      type: String,
-      enum: ["Pending", "Completed", "issues"],
-      default: "Pending",
       required: true,
     },
   },
@@ -28,4 +46,5 @@ const TyreInfoSchema = new mongoose.Schema(
 );
 
 const TyreInfo = mongoose.model("ClientOrder", TyreInfoSchema);
+
 module.exports = TyreInfo;

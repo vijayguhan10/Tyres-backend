@@ -4,13 +4,15 @@ const {
   getTyreInfos,
   getTyreInfoById,
   updateTyreInfo,
+  updateOrderStatus,
   deleteTyreInfo,
 } = require("../../Controllers/client/OrderTyre.controller");
 const router = express.Router();
-const { authenticateJWT } = require("../../Controllers/User.controller");
-router.post("/ordertyre", authenticateJWT, createTyreInfo);
-router.get("/orderinfo", authenticateJWT, getTyreInfos);
-router.get("/orderinfo/:id", authenticateJWT, getTyreInfoById);
-router.put("/orderinfo/:id", authenticateJWT, updateTyreInfo);
-router.delete("/orderinfo/:id", authenticateJWT, deleteTyreInfo);
+
+router.post("/ordertyre", createTyreInfo);
+router.get("/orderinfo", getTyreInfos);
+router.get("/orderinfo/:id", getTyreInfoById);
+router.put("/orderinfo/:id", updateTyreInfo);
+router.patch("/updatestatus/:id", updateOrderStatus);
+router.delete("/orderinfo/:id", deleteTyreInfo);
 module.exports = router;

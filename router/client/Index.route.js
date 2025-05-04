@@ -2,7 +2,17 @@ const express = require("express");
 const route = express.Router();
 const appointmentRoutes = require("./Appointment.route");
 const orderRoutes = require("./Order.route");
-route.use("/", appointmentRoutes);  
-route.use("/order-client", orderRoutes);  
+const addVehicleRoutes = require("./AddVehicle.route");
+const { authenticateJWT } = require("../../Controllers/User.controller");
+const { rolecheck } = require("../../Utils/Role");
+
+route.use(
+  "/appointment",
+  authenticateJWT,
+  rolecheck("client"),
+  appointmentRoutes
+);
+route.use("/order-client", authenticateJWT, rolecheck("client"), orderRoutes);
+route.use("/vehicle", authenticateJWT, rolecheck("client"), addVehicleRoutes);
 
 module.exports = route;

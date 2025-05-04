@@ -1,5 +1,19 @@
 const mongoose = require("mongoose");
 
+const sizequantity = new mongoose.Schema(
+  {
+    size: {
+      type: String,
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
 const TyreRequestSchema = new mongoose.Schema(
   {
     userId: {
@@ -7,24 +21,27 @@ const TyreRequestSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    tyreBrand: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    size: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    addressid: {
+    ShopId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Address",
+      ref: "Shop",
+      required: true,
+    },
+    brand: {
+      type: String,
+      required: true,
+    },
+    model: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ["Tubeless", "Tube", "Radial", "Bias"],
+      required: true,
+    },
+    vehicleType: {
+      type: String,
+      enum: ["Car", "Bike", "Truck", "Bus", "SUV", "Van", "Tractor"],
       required: true,
     },
     status: {
@@ -35,7 +52,6 @@ const TyreRequestSchema = new mongoose.Schema(
     },
     deleterequest: {
       type: Boolean,
-      enum: [true, false],
       required: true,
       default: false,
     },
@@ -44,10 +60,15 @@ const TyreRequestSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    specification: [sizequantity],
+    price: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
 const TyreRequest = mongoose.model("TyreRequest", TyreRequestSchema);
-
 module.exports = TyreRequest;

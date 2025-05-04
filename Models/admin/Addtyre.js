@@ -1,5 +1,23 @@
 const mongoose = require("mongoose");
 
+const StockSchema = new mongoose.Schema(
+  {
+    size: {
+      type: String,
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
 const TyreSchema = new mongoose.Schema(
   {
     brand: {
@@ -7,10 +25,6 @@ const TyreSchema = new mongoose.Schema(
       required: true,
     },
     model: {
-      type: String,
-      required: true,
-    },
-    size: {
       type: String,
       required: true,
     },
@@ -32,14 +46,6 @@ const TyreSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    quantityInStock: {
-      type: Number,
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
     description: {
       type: String,
     },
@@ -55,6 +61,7 @@ const TyreSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    stock: [StockSchema], 
   },
   { timestamps: true }
 );

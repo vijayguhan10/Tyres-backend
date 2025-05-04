@@ -20,15 +20,15 @@ const AppointmentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    tyreInfo: {
+    orderinfo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ClientOrder",
       required: true,
     },
-    status: {
+    paymentStatus: {
       type: String,
-      enum: ["Pending", "Completed", "issues"],
-      default: "Pending",
+      enum: ["cod", "Paid", "Unpaid"],
+      default: "Unpaid",
       required: true,
     },
   },
@@ -36,3 +36,4 @@ const AppointmentSchema = new mongoose.Schema(
 );
 const Appointment = mongoose.model("Appointment", AppointmentSchema);
 module.exports = Appointment;
+//cash on delivery =cod
