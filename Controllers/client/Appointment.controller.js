@@ -1,16 +1,15 @@
 const Appointment = require("../../Models/client/Appointment");
 const createAppointment = async (req, res) => {
   try {
-    const token = req.cookies.token;
-    if (!token) return res.status(401).json({ message: "No token provided" });
-
-    const { addressId, time, date, orderinfo, paymentStatus } = req.body;
+    // Token and authorization checks removed
+    const { addressId, time, date, orderinfo, paymentStatus } = req.body.appointmentData;
+    console.log("Request body for appointment:", req.body)
     if (!addressId || !time || !date || !orderinfo) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const appointment = await Appointment.create({
-      userId: req.user.userId,
+      userId: req.user.userId, // Still using req.user.userId from the request
       addressId,
       time,
       date,

@@ -27,7 +27,7 @@ const AppointmentSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["CashOnDelivery", "Paid", "Unpaid"],
+      enum: ["cod", "Paid", "Unpaid"],
       default: "Unpaid",
       required: true,
     },
@@ -36,3 +36,4 @@ const AppointmentSchema = new mongoose.Schema(
 );
 const Appointment = mongoose.model("Appointment", AppointmentSchema);
 module.exports = Appointment;
+//cash on delivery =cod
