@@ -25,10 +25,10 @@ const AppointmentSchema = new mongoose.Schema(
       ref: "ClientOrder",
       required: true,
     },
-    status: {
+    paymentStatus: {
       type: String,
-      enum: ["Pending", "Completed", "issues"],
-      default: "Pending",
+      enum: ["CashOnDelivery", "Paid", "Unpaid"],
+      default: "Unpaid",
       required: true,
     },
   },
