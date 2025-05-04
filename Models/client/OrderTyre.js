@@ -8,6 +8,10 @@ const OrderItemSchema = new mongoose.Schema(
       ref: "addtyre",
       required: true,
     },
+    size: {
+      type: String,
+      required: true,
+    },
     quantity: {
       type: Number,
       required: true,
@@ -28,7 +32,7 @@ const TyreInfoSchema = new mongoose.Schema(
     orderItems: [OrderItemSchema],
     status: {
       type: String,
-      enum: ["Pending", "Completed", "Issues"],
+      enum: ["Pending", "Completed"],
       default: "Pending",
       required: true,
     },

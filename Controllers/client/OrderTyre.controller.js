@@ -1,30 +1,31 @@
 const TyreInfo = require("../../Models/client/OrderTyre");
-const Tyre = require("../../Models/admin/Addtyre");
+const addtyre= require("../../Models/admin/Addtyre");
 const mongoose = require("mongoose");
 
-async function reduceStock(tyreId, quantity) {
-  const tyre = await Tyre.findById(tyreId);
+// These functions are no longer needed since we're not checking stock
+// async function reduceStock(tyreId, quantity) {
+//   const tyre = await Tyre.findById(tyreId);
 
-  if (!tyre) throw new Error("Tyre not found");
-  
-  if (tyre.quantity < quantity) {
-    throw new Error(
-      `Not enough stock. Available: ${tyre.quantity}`
-    );
-  }
+//   if (!tyre) throw new Error("Tyre not found");
+//   
+//   if (tyre.quantity < quantity) {
+//     throw new Error(
+//       `Not enough stock. Available: ${tyre.quantity}`
+//     );
+//   }
 
-  tyre.quantity -= quantity;
-  await tyre.save();
-}
+//   tyre.quantity -= quantity;
+//   await tyre.save();
+// }
 
-async function increaseStock(tyreId, quantity) {
-  const tyre = await Tyre.findById(tyreId);
+// async function increaseStock(tyreId, quantity) {
+//   const tyre = await Tyre.findById(tyreId);
 
-  if (!tyre) throw new Error("Tyre not found");
+//   if (!tyre) throw new Error("Tyre not found");
 
-  tyre.quantity += quantity;
-  await tyre.save();
-}
+//   tyre.quantity += quantity;
+//   await tyre.save();
+// }
 
 async function validateOrderItems(orderItems) {
   if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
@@ -38,8 +39,9 @@ async function validateOrderItems(orderItems) {
     throw new Error(`Invalid tyre ID format: ${invalidIds.join(', ')}`);
   }
 
-  const tyres = await Tyre.find({ _id: { $in: tyreIds }, deleted: false });
-  
+  // Only check if tyres exist, don't validate stock
+  const tyres = await addtyre.find({ _id: { $in: tyreIds }, deleted: false });
+  console.log(tyres);
   if (tyres.length !== tyreIds.length) {
     const foundIds = tyres.map(tyre => tyre._id.toString());
     const missingIds = tyreIds.filter(id => !foundIds.includes(id));
@@ -51,12 +53,22 @@ async function validateOrderItems(orderItems) {
       throw new Error("Quantity must be at least 1 for all items");
     }
     
+    if (!item.size) {
+      throw new Error("Size is required for all items");
+    }
+    
+    // No longer checking stock availability
+    // Just verify the tyre exists
     const tyre = tyres.find(t => t._id.toString() === item.tyre.toString());
     if (!tyre) continue;
     
-    if (tyre.quantity < item.quantity) {
-      throw new Error(`Not enough stock for ${tyre.brand} ${tyre.model}. Available: ${tyre.quantity}, Requested: ${item.quantity}`);
+    // Check if the size exists in the tyre's stock but don't check quantity
+    const stockItem = tyre.stock.find(stock => stock.size === item.size);
+    if (!stockItem) {
+      throw new Error(`Size ${item.size} not found for ${tyre.brand} ${tyre.model}`);
     }
+    
+    // Stock quantity check removed
   }
 
   return tyres;
