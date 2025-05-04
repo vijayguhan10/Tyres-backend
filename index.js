@@ -7,6 +7,7 @@ const AddressRoutes = require("./router/Address.route");
 const OrderTyres_clients = require("./router/client/Index.route");
 const AdminRouter = require("./router/admin/Index.route");
 const ShopRouter = require("./router/shop/Index.route");
+const morgan = require("morgan");
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -17,7 +18,7 @@ app.use("/api/address", AddressRoutes);
 app.use("/api/client", OrderTyres_clients);
 app.use("/api/admin", AdminRouter);
 app.use("/api", ShopRouter);
-
+app.use(morgan("dev"));
 console.log("h");
 ConnectDb();
 const PORT = process.env.PORT || 5000;

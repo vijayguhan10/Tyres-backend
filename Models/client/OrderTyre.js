@@ -1,8 +1,13 @@
 const mongoose = require("mongoose");
+const addtyre = require("../../Models/admin/Addtyre");
 
-// Define stock schema separately if needed
-const StockSchema = new mongoose.Schema(
+const OrderItemSchema = new mongoose.Schema(
   {
+    tyre: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "addtyre",
+      required: true,
+    },
     size: {
       type: String,
       required: true,
@@ -10,12 +15,13 @@ const StockSchema = new mongoose.Schema(
     quantity: {
       type: Number,
       required: true,
+      min: 1,
+      default: 1
     },
   },
   { _id: false }
 );
 
-// Tyre Info for Client Order
 const TyreInfoSchema = new mongoose.Schema(
   {
     userId: {
@@ -23,36 +29,10 @@ const TyreInfoSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    brand: {
-      type: String,
-      required: true,
-    },
-    model: {
-      type: String,
-      required: true,
-    },
-    type: {
-      type: String,
-      enum: ["Tubeless", "Tube", "Radial", "Bias"],
-      required: true,
-    },
-    vehicleType: {
-      type: String,
-      enum: ["Car", "Bike", "Truck", "Bus", "SUV", "Van", "Tractor"],
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    stock: {
-      type: [StockSchema], 
-      required: true,
-    },
+    orderItems: [OrderItemSchema],
     status: {
       type: String,
-      enum: ["Pending", "Completed", "Issues"],
+      enum: ["Pending", "Completed"],
       default: "Pending",
       required: true,
     },

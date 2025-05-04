@@ -52,7 +52,10 @@ const loginUser = async (req, res) => {
   }
 };
 const authenticateJWT = async (req, res, next) => {
-  const token = req.cookies.token;
+  // const token = req.cookies.token;
+  const token = req.headers.authorization?.split(" ")[1];
+
+  console.log("token : ", token);
   if (!token) {
     return res.status(403).json({ message: "Access denied" });
   }

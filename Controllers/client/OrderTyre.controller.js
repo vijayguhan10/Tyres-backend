@@ -1,84 +1,105 @@
 const TyreInfo = require("../../Models/client/OrderTyre");
-const Tyre = require("../../Models/admin/Addtyre");
-// Helper function to reduce stock
-async function reduceStock(brand, model, size, quantity) {
-  const tyre = await Tyre.findOne({ brand, model });
+const addtyre= require("../../Models/admin/Addtyre");
+const mongoose = require("mongoose");
 
-  if (!tyre) throw new Error("Tyre not found for the given brand and model");
-  const stockItem = tyre.stock.find((item) => item.size === size);
+// These functions are no longer needed since we're not checking stock
+// async function reduceStock(tyreId, quantity) {
+//   const tyre = await Tyre.findById(tyreId);
 
-  if (!stockItem) {
-    throw new Error(`Size ${size} not available`);
+//   if (!tyre) throw new Error("Tyre not found");
+//   
+//   if (tyre.quantity < quantity) {
+//     throw new Error(
+//       `Not enough stock. Available: ${tyre.quantity}`
+//     );
+//   }
+
+//   tyre.quantity -= quantity;
+//   await tyre.save();
+// }
+
+// async function increaseStock(tyreId, quantity) {
+//   const tyre = await Tyre.findById(tyreId);
+
+//   if (!tyre) throw new Error("Tyre not found");
+
+//   tyre.quantity += quantity;
+//   await tyre.save();
+// }
+
+async function validateOrderItems(orderItems) {
+  if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
+    throw new Error("Order items are required and must be an array");
   }
 
-  if (stockItem.quantity < quantity) {
-    throw new Error(
-      `Not enough stock for size ${size}. Available: ${stockItem.quantity}`
-    );
+  const tyreIds = orderItems.map(item => item.tyre);
+  const invalidIds = tyreIds.filter(id => !mongoose.Types.ObjectId.isValid(id));
+  
+  if (invalidIds.length > 0) {
+    throw new Error(`Invalid tyre ID format: ${invalidIds.join(', ')}`);
   }
 
-  stockItem.quantity -= quantity;
-  await tyre.save();
-}
-
-
-async function increaseStock(brand, model, size, quantity) {
-  const tyre = await Tyre.findOne({ brand, model });
-
-  if (!tyre) throw new Error("Tyre not found for the given brand and model");
-
-  const stockItem = tyre.stock.find((item) => item.size === size);
-
-  if (!stockItem) {
-    throw new Error(`Size ${size} not available in stock`);
+  // Only check if tyres exist, don't validate stock
+  const tyres = await addtyre.find({ _id: { $in: tyreIds }, deleted: false });
+  console.log(tyres);
+  if (tyres.length !== tyreIds.length) {
+    const foundIds = tyres.map(tyre => tyre._id.toString());
+    const missingIds = tyreIds.filter(id => !foundIds.includes(id));
+    throw new Error(`Some tyres do not exist or are deleted: ${missingIds.join(', ')}`);
   }
-  stockItem.quantity += quantity;
 
-  await tyre.save();
+  for (const item of orderItems) {
+    if (!item.quantity || item.quantity < 1) {
+      throw new Error("Quantity must be at least 1 for all items");
+    }
+    
+    if (!item.size) {
+      throw new Error("Size is required for all items");
+    }
+    
+    // No longer checking stock availability
+    // Just verify the tyre exists
+    const tyre = tyres.find(t => t._id.toString() === item.tyre.toString());
+    if (!tyre) continue;
+    
+    // Check if the size exists in the tyre's stock but don't check quantity
+    const stockItem = tyre.stock.find(stock => stock.size === item.size);
+    if (!stockItem) {
+      throw new Error(`Size ${item.size} not found for ${tyre.brand} ${tyre.model}`);
+    }
+    
+    // Stock quantity check removed
+  }
+
+  return tyres;
 }
 
 const createTyreInfo = async (req, res) => {
-  const token = req.cookies.token;
-  if (!token) return res.status(403).json({ message: "Access denied" });
-
   console.log("Request body for ordering tyres:", req.body);
-
   try {
-    if (req.user.role !== "client") {
-      return res.status(403).json({ message: "Only clients can order tyres" });
-    }
+    const { orderItems } = req.body;
 
-    const { brand, model, type, vehicleType, price, stock } = req.body;
-
-    if (!stock || stock.length === 0) {
-      return res.status(400).json({ message: "Stock details are required" });
-    }
-
-    for (const item of stock) {
-      await reduceStock(brand, model, item.size, item.quantity);
-    }
+    await validateOrderItems(orderItems);
 
     const newTyreInfo = new TyreInfo({
       userId: req.user.userId,
-      brand,
-      model,
-      type,
-      vehicleType,
-      price,
-      stock,
+      orderItems: orderItems,
       status: req.body.status || "Pending",
     });
+    
     const savedTyreInfo = await newTyreInfo.save();
     res.status(201).json(savedTyreInfo);
   } catch (error) {
     console.log("error:", error.message);
-    res.status(500).json({ message: error.message || "Internal server error" });
+    res.status(400).json({ message: error.message || "Internal server error" });
   }
 };
 
 const getTyreInfos = async (req, res) => {
   try {
-    const tyreInfos = await TyreInfo.find().populate("userId", "name email");
+    const tyreInfos = await TyreInfo.find()
+      .populate("userId", "name email")
+      .populate("orderItems.tyre");
     res.status(200).json(tyreInfos);
   } catch (error) {
     console.log("error:", error);
@@ -88,10 +109,9 @@ const getTyreInfos = async (req, res) => {
 
 const getTyreInfoById = async (req, res) => {
   try {
-    const tyreInfo = await TyreInfo.findById(req.params.id).populate(
-      "userId",
-      "name email"
-    );
+    const tyreInfo = await TyreInfo.findById(req.params.id)
+      .populate("userId", "name email")
+      .populate("orderItems.tyre");
 
     if (!tyreInfo) {
       return res.status(404).json({ message: "Tyre order not found" });
@@ -105,9 +125,6 @@ const getTyreInfoById = async (req, res) => {
 };
 
 const updateTyreInfo = async (req, res) => {
-  const token = req.cookies.token;
-  if (!token) return res.status(403).json({ message: "Access denied" });
-
   try {
     const tyreInfo = await TyreInfo.findById(req.params.id);
 
@@ -115,41 +132,24 @@ const updateTyreInfo = async (req, res) => {
       return res.status(404).json({ message: "Tyre order not found" });
     }
 
-    if (req.body.stock) {
-      for (const item of tyreInfo.stock) {
-        await increaseStock(
-          tyreInfo.brand,
-          tyreInfo.model,
-          item.size,
-          item.quantity
-        );
-      }
-
-      for (const item of req.body.stock) {
-        await reduceStock(
-          tyreInfo.brand,
-          tyreInfo.model,
-          item.size,
-          item.quantity
-        );
-      }
-
-      tyreInfo.stock = req.body.stock;
+    if (req.body.orderItems) {
+      await validateOrderItems(req.body.orderItems);
+      tyreInfo.orderItems = req.body.orderItems;
     }
 
-    tyreInfo.status = req.body.status || tyreInfo.status;
+    if (req.body.status) {
+      tyreInfo.status = req.body.status;
+    }
+
     const updatedTyreInfo = await tyreInfo.save();
     res.status(200).json(updatedTyreInfo);
   } catch (error) {
     console.log("error:", error.message);
-    res.status(500).json({ message: error.message || "Internal server error" });
+    res.status(400).json({ message: error.message || "Internal server error" });
   }
 };
 
 const deleteTyreInfo = async (req, res) => {
-  const token = req.cookies.token;
-  if (!token) return res.status(403).json({ message: "Access denied" });
-
   try {
     const tyreInfo = await TyreInfo.findById(req.params.id);
 
@@ -169,10 +169,45 @@ const deleteTyreInfo = async (req, res) => {
   }
 };
 
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    if (!status) {
+      return res.status(400).json({ message: "Status is required" });
+    }
+    
+    if (!['Pending', 'Completed', 'Issues'].includes(status)) {
+      return res.status(400).json({ 
+        message: "Invalid status. Must be one of: Pending, Completed, Issues" 
+      });
+    }
+
+    const tyreInfo = await TyreInfo.findById(id);
+
+    if (!tyreInfo) {
+      return res.status(404).json({ message: "Tyre order not found" });
+    }
+
+    tyreInfo.status = status;
+    const updatedTyreInfo = await tyreInfo.save();
+    
+    res.status(200).json({
+      message: "Order status updated successfully",
+      order: updatedTyreInfo
+    });
+  } catch (error) {
+    console.log("error:", error.message);
+    res.status(500).json({ message: error.message || "Internal server error" });
+  }
+};
+
 module.exports = {
   createTyreInfo,
   getTyreInfos,
   getTyreInfoById,
   updateTyreInfo,
   deleteTyreInfo,
+  updateOrderStatus,
 };

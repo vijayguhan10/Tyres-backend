@@ -8,10 +8,11 @@ const {
   deleteAddress,
 } = require("../Controllers/Address.controller");
 const { authenticateJWT } = require("../Controllers/User.controller");
+const { rolecheck } = require("../Utils/Role");
 
-router.post("/create", authenticateJWT, createAddress);
-router.get("/getall", authenticateJWT, getAllAddresses);
-router.get("/:id", authenticateJWT, getAddressById);
-router.put("/:id", authenticateJWT, updateAddress);
-router.delete("/:id", authenticateJWT, deleteAddress);
+router.post("/create", authenticateJWT, rolecheck("client"), createAddress);
+router.get("/getall", authenticateJWT, rolecheck("client"), getAllAddresses);
+router.get("/:id", authenticateJWT, rolecheck("client"), getAddressById);
+router.put("/:id", authenticateJWT, rolecheck("client"), updateAddress);
+router.delete("/:id", authenticateJWT, rolecheck("client"), deleteAddress);
 module.exports = router;
