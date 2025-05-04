@@ -31,6 +31,13 @@ const AppointmentSchema = new mongoose.Schema(
       default: "Unpaid",
       required: true,
     },
+    orderstatus: {
+      type: String,
+      enum: ["pending", "completed", "issue"],
+      default: "pending",
+      required: true,
+    },
+
   },
   { timestamps: true }
 );

@@ -1,29 +1,34 @@
 const mongoose = require("mongoose");
 const Appointment = require("../../Models/client/Appointment");
-
 const getUserAppointments = async (req, res) => {
   try {
-    const userId = req.user._id; // Assuming you're using auth middleware
+    const userId = req.user.userId;
 
     const upcomingAppointments = await Appointment.find({
       userId,
-      status: "Pending",
-    }).populate("userId addressId orderinfo");
+      orderstatus: "pending",
+    })
 
     const completedAppointments = await Appointment.find({
       userId,
-      status: "Completed",
-    }).populate("userId addressId orderinfo");
+      orderstatus: "completed",
+    })
+
+    const paymentpending = await Appointment.find({
+      userId,
+      paymentStatus: "Unpaid",
+    })
 
     const issueAppointments = await Appointment.find({
       userId,
       status: "issues",
-    }).populate("userId addressId orderinfo");
+    })
 
     return res.status(200).json({
       success: true,
       upcoming: upcomingAppointments,
       completed: completedAppointments,
+      paymentpending,
       issues: issueAppointments,
     });
   } catch (error) {
@@ -35,4 +40,4 @@ const getUserAppointments = async (req, res) => {
   }
 };
 
-module.exports = {getUserAppointments};
+module.exports = { getUserAppointments };
