@@ -13,8 +13,11 @@ const {
   updateAppointment,
   deleteAppointment,
 } = require("../../Controllers/client/Appointment.controller");
+const {
+  getUserAppointments,
+} = require("../../Controllers/client/OrderData.controller");
 const router = express.Router();
-
+router.get("/appointments/summary", getUserAppointments);
 router.post("/bookappointment", createAppointment);
 router.get("/singleappointment", getAppointments);
 router.get("/appointments/:id", getAppointmentById);
