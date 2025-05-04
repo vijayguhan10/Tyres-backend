@@ -10,6 +10,10 @@ const StockSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    price: {
+      type: Number,
+      required: true,
+    },
   },
   { _id: false }
 );
@@ -40,10 +44,6 @@ const TyreSchema = new mongoose.Schema(
     },
     speedRating: {
       type: String,
-      required: true,
-    },
-    price: {
-      type: Number,
       required: true,
     },
     description: {
