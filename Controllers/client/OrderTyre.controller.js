@@ -1,5 +1,5 @@
 const TyreInfo = require("../../Models/client/OrderTyre");
-const Tyre = require("../../Models/admin/Addtyre");
+const addtyre= require("../../Models/admin/Addtyre");
 const mongoose = require("mongoose");
 
 async function reduceStock(tyreId, quantity) {
@@ -38,8 +38,8 @@ async function validateOrderItems(orderItems) {
     throw new Error(`Invalid tyre ID format: ${invalidIds.join(', ')}`);
   }
 
-  const tyres = await Tyre.find({ _id: { $in: tyreIds }, deleted: false });
-  
+  const tyres = await addtyre.find({ _id: { $in: tyreIds }, deleted: false });
+  console.log(tyres);
   if (tyres.length !== tyreIds.length) {
     const foundIds = tyres.map(tyre => tyre._id.toString());
     const missingIds = tyreIds.filter(id => !foundIds.includes(id));
@@ -51,11 +51,22 @@ async function validateOrderItems(orderItems) {
       throw new Error("Quantity must be at least 1 for all items");
     }
     
+    if (!item.size) {
+      throw new Error("Size is required for all items");
+    }
+    
     const tyre = tyres.find(t => t._id.toString() === item.tyre.toString());
     if (!tyre) continue;
     
-    if (tyre.quantity < item.quantity) {
-      throw new Error(`Not enough stock for ${tyre.brand} ${tyre.model}. Available: ${tyre.quantity}, Requested: ${item.quantity}`);
+    // Check if the size exists in the tyre's stock
+    const stockItem = tyre.stock.find(stock => stock.size === item.size);
+    if (!stockItem) {
+      throw new Error(`Size ${item.size} not found for ${tyre.brand} ${tyre.model}`);
+    }
+    
+    // Check if there's enough quantity for the specific size
+    if (stockItem.quantity < item.quantity) {
+      throw new Error(`Not enough stock for ${tyre.brand} ${tyre.model} in size ${item.size}. Available: ${stockItem.quantity}, Requested: ${item.quantity}`);
     }
   }
 
