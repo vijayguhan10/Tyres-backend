@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 
-const sizequantity = new mongoose.Schema(
+const TyreMetaData = new mongoose.Schema(
   {
+    tyreId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tyre",
+      required: true,
+    },
     size: {
       type: String,
       required: true,
@@ -26,24 +31,6 @@ const TyreRequestSchema = new mongoose.Schema(
       ref: "Shop",
       required: true,
     },
-    brand: {
-      type: String,
-      required: true,
-    },
-    model: {
-      type: String,
-      required: true,
-    },
-    type: {
-      type: String,
-      enum: ["Tubeless", "Tube", "Radial", "Bias"],
-      required: true,
-    },
-    vehicleType: {
-      type: String,
-      enum: ["Car", "Bike", "Truck", "Bus", "SUV", "Van", "Tractor"],
-      required: true,
-    },
     status: {
       type: String,
       enum: ["Pending", "Approved", "Rejected"],
@@ -60,7 +47,7 @@ const TyreRequestSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
-    specification: [sizequantity],
+    specification: [TyreMetaData],
     price: {
       type: Number,
       default: 0,

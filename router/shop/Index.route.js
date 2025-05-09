@@ -6,9 +6,9 @@ const { authenticateJWT } = require("../../Controllers/User.controller");
 const { rolecheck } = require("../../Utils/Role");
 route.use("/shops", authenticateJWT, rolecheck("fitment-center"), Address);
 route.use(
-  "/orders",
+  "/ordertyres",
   authenticateJWT,
-  rolecheck("fitment-center"),
+  // rolecheck("fitment-center"),
   ordertyres
 );
 module.exports = route;

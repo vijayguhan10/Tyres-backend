@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Address = require("../Address");
+
 const ShopSchema = new mongoose.Schema(
   {
     userId: {
@@ -11,11 +11,7 @@ const ShopSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    address: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Address",
-      required: true,
-    },
+   
     orders: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -28,8 +24,39 @@ const ShopSchema = new mongoose.Schema(
         ref: "TyreRequest",
       },
     ],
+
+    // ✅ New fields added below
+    adminNotes: {
+      type: String,
+      default: "",
+    },
+    phoneNumber: {
+      type: String,
+    },
+    businessAddress: {
+      type: String,
+    },
+    pincode: {
+      type: String,
+    },
+    region: {
+      type: String,
+    },
+    noOfStaff: {
+      type: String,
+    },
+    openingTime: {
+      type: Date,
+    },
+    closingTime: {
+      type: Date,
+    },
+    daysOfOperation: {
+      type: [String], // Example: ["Monday", "Tuesday"]
+    },
   },
   { timestamps: true }
 );
+
 const Shop = mongoose.model("Shop", ShopSchema);
 module.exports = Shop;

@@ -9,7 +9,7 @@ const { rolecheck } = require("../../Utils/Role");
 route.use(
   "/appointment",
   authenticateJWT,
-  rolecheck("client"),
+  // rolecheck("client"),
   appointmentRoutes
 );
 route.use("/order-client", authenticateJWT, rolecheck("client"), orderRoutes);

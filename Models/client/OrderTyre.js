@@ -8,6 +8,12 @@ const OrderItemSchema = new mongoose.Schema(
       ref: "addtyre",
       required: true,
     },
+    vehicleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "AddVehicle",
+      default: null,
+      required: false,
+    },
     size: {
       type: String,
       required: true,
