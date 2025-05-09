@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createShop, getShopByUserId, updateShop,getAllShops } = require("../../Controllers/shop/CreateShop.Controller");
+const { createShop, getShopByUserId, updateShop,getAllShops } = require("../../Controllers/shop/Partnershop.Controller");
 router.post("/create-shops", createShop); 
 router.get("/getshopbyid", getShopByUserId); 
 router.put("/updateshop", updateShop); 

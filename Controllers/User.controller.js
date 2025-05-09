@@ -32,7 +32,9 @@ const createUser = async (req, res) => {
   }
 };
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
+  console.log("req.body : ", req.body);
+  console.log("role : ", role);
 
   try {
     const user = await User.findOne({ email });
@@ -45,17 +47,23 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
+    // ✅ Check if the roles match
+    if (user.role !== role) {
+      return res.status(403).json({ message: "Unauthorized role access" });
+    }
+
     const token = generateToken(user._id, user.role);
     res.status(200).json({ message: "Login successful", token });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
 const authenticateJWT = async (req, res, next) => {
   // const token = req.cookies.token;
   const token = req.headers.authorization?.split(" ")[1];
 
-  console.log("token : ", token);
+  // console.log("token : ", token);
   if (!token) {
     return res.status(403).json({ message: "Access denied" });
   }

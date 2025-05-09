@@ -2,17 +2,36 @@ const Shop = require("../../Models/shop/Shop");
 const Address = require("../../Models/Address");
 
 const createShop = async (req, res) => {
+  console.log("shop : ", req.body);
   try {
-    const { name, address } = req.body;
-    const validAddress = await Address.findById(address);
-    if (!validAddress) {
-      return res.status(404).json({ message: "Address not found" });
-    }
+    let {
+      userId,
+      name,
+      adminNotes,
+      phoneNumber,
+      businessAddress,
+
+      region,
+      noOfStaff,
+      openingTime,
+      closingTime,
+      daysOfOperation,
+    } = req.body;
+    let pincode = "5543333";
+   
 
     const newShop = new Shop({
-      userId: req.user.userId,
+      userId,
       name,
-      address,
+      adminNotes,
+      phoneNumber,
+      businessAddress,
+      pincode,
+      region,
+      noOfStaff,
+      openingTime,
+      closingTime,
+      daysOfOperation,
     });
 
     const savedShop = await newShop.save();
@@ -25,8 +44,8 @@ const createShop = async (req, res) => {
 
 const getShopByUserId = async (req, res) => {
   try {
-    const shop = await Shop.findOne({ userId: req.user.userId })
-      .populate("address")
+    const { ShopId } = req.body;
+    const shop = await Shop.findById(ShopId)
       .populate("orders")
       .populate("TyresRequested");
 
@@ -40,10 +59,10 @@ const getShopByUserId = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 const getAllShops = async (req, res) => {
   try {
     const shops = await Shop.find()
-      .populate("address")
       .populate("orders")
       .populate("TyresRequested");
 
@@ -60,7 +79,22 @@ const getAllShops = async (req, res) => {
 
 const updateShop = async (req, res) => {
   try {
-    const { name, address, orders, TyresRequested } = req.body;
+    const {
+      userId,
+      name,
+      address,
+      orders,
+      TyresRequested,
+      adminNotes,
+      phoneNumber,
+      businessAddress,
+      pincode,
+      region,
+      noOfStaff,
+      openingTime,
+      closingTime,
+      daysOfOperation,
+    } = req.body;
 
     if (address) {
       const validAddress = await Address.findById(address);
@@ -70,12 +104,21 @@ const updateShop = async (req, res) => {
     }
 
     const shop = await Shop.findOneAndUpdate(
-      { userId: req.user.userId },
+      { userId },
       {
-        name: name || undefined,
-        address: address || undefined,
-        orders: orders || undefined,
-        TyresRequested: TyresRequested || undefined,
+        name,
+        address,
+        orders,
+        TyresRequested,
+        adminNotes,
+        phoneNumber,
+        businessAddress,
+        pincode,
+        region,
+        noOfStaff,
+        openingTime,
+        closingTime,
+        daysOfOperation,
       },
       { new: true }
     )
