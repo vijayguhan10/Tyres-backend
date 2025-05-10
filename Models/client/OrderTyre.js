@@ -38,7 +38,7 @@ const TyreInfoSchema = new mongoose.Schema(
     orderItems: [OrderItemSchema],
     status: {
       type: String,
-      enum: ["Pending", "Completed"],
+      enum: ["Pending", "Completed","Approved","Rejected"],
       default: "Pending",
       required: true,
     },

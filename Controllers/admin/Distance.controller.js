@@ -41,7 +41,7 @@ const getCoordinates = async (pincode) => {
 
 // Haversine formula to calculate distance between two coordinates
 const haversine = (lat1, lon1, lat2, lon2) => {
-  const R = 6371; // Earth radius in km
+  const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -68,12 +68,8 @@ const getShopsWithDistance = async (req, res) => {
         .json({ error: "Invalid client pincode or coordinates not available" });
     }
 
-    // Find shops and populate necessary fields
-    const shops = await Shop.find().populate({
-      path: 'TyresRequested',
-      match: { status: 'Approved' }, // Only include approved tyre requests
-      select: 'status specification price createdAt' // Select only needed fields
-    });
+    // Fetch all shops without populating TyresRequested
+    const shops = await Shop.find();
 
     const uniquePincodes = [...new Set(shops.map((shop) => shop.pincode))];
     const pincodeGeos = {};
@@ -98,20 +94,17 @@ const getShopsWithDistance = async (req, res) => {
         );
 
         if (distance <= 50) {
-          const completedTyres = shop.TyresRequested.map(request => ({
-            requestId: request._id,
-            status: request.status,
-            price: request.price,
-            createdAt: request.createdAt,
-            tyres: request.specification.map(spec => ({
-              tyreId: spec.tyreId,
-              size: spec.size,
-              quantity: spec.quantity
-            }))
+          const availableTyres = shop.ShopStocks.map((stock) => ({
+            tyreId: stock.tyreId,
+            sizes: stock.sizes.map((size) => ({
+              size: size.size,
+              quantity: size.quantity,
+              price: size.price,
+            })),
           }));
 
           return {
-           UserId: shop.userId,
+            userId: shop.userId,
             shopId: shop._id,
             shopName: shop.name,
             phoneNumber: shop.phoneNumber,
@@ -122,7 +115,7 @@ const getShopsWithDistance = async (req, res) => {
             closingTime: shop.closingTime,
             daysOfOperation: shop.daysOfOperation,
             distance: distance.toFixed(2),
-            completedTyres: completedTyres
+            availableTyres: availableTyres,
           };
         }
 

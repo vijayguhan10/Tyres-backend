@@ -7,17 +7,27 @@ const ShopSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
     name: {
       type: String,
       required: true,
     },
-   
+
     orders: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Appointment",
+        orderId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Appointment",
+          required: true,
+        },
+        status: {
+          type: String,
+          enum: ["pending", "completed", "rejected"],
+          default: "pending",
+        },
       },
     ],
+
     TyresRequested: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -25,34 +35,67 @@ const ShopSchema = new mongoose.Schema(
       },
     ],
 
-    // ✅ New fields added below
+    ShopStocks: [
+      {
+        tyreId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "addtyre",
+          required: true,
+        },
+        sizes: [
+          {
+            size: {
+              type: String,
+              required: true,
+            },
+            quantity: {
+              type: Number,
+              required: true,
+            },
+            price: {
+              type: Number,
+              required: true,
+            },
+          },
+        ],
+      },
+    ],
+
     adminNotes: {
       type: String,
       default: "",
     },
+
     phoneNumber: {
       type: String,
     },
+
     businessAddress: {
       type: String,
     },
+
     pincode: {
       type: String,
     },
+
     region: {
       type: String,
     },
+
     noOfStaff: {
       type: String,
     },
+
     openingTime: {
       type: Date,
     },
+
     closingTime: {
       type: Date,
     },
+
     daysOfOperation: {
-      type: [String], // Example: ["Monday", "Tuesday"]
+      type: [String],
     },
   },
   { timestamps: true }
