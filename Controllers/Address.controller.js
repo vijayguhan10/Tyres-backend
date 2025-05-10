@@ -4,7 +4,7 @@ const createAddress = async (req, res) => {
   try {
     const { street, city, state, postalCode, country } = req.body;
     const { userId, role } = req.user;
-
+    console.log(req.body)
     const address = await Address.create({
       userId,
       role,
