@@ -61,7 +61,7 @@ const TyreSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    stock: [StockSchema], 
+    stock: [StockSchema],
   },
   { timestamps: true }
 );

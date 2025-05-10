@@ -36,8 +36,62 @@ const createTyre = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+const AddNewStocks = async (req, res) => {
+  try {
+    const { stock, tyreid } = req.body;
+    console.log(stock,tyreid)
 
-// GET /api/tyres
+    if (!tyreid || !stock) {
+      return res.status(400).json({ 
+        message: "Tyre ID and stock details are required" 
+      });
+    }
+
+    const existingTyre = await Tyre.findById(tyreid);
+
+    if (!existingTyre) {
+      return res.status(404).json({
+        message: "No tyre found with the specified ID"
+      });
+    }
+
+    if (!Array.isArray(stock)) {
+      return res.status(400).json({
+        message: "Stock must be an array of size, quantity and price objects"
+      });
+    }
+
+    for (const item of stock) {
+      const { size, quantity, price } = item;
+      
+      const existingSize = existingTyre.stock.find(s => s.size === size);
+      
+      if (existingSize) {
+        const newQuantity = Number(quantity) - existingSize.quantity;
+        existingSize.quantity += newQuantity;
+        if (price) {
+          existingSize.price = Number(price);
+        }
+      } else {
+        existingTyre.stock.push({
+          size,
+          quantity: Number(quantity),
+          price: Number(price)
+        });
+      }
+    }
+
+    await existingTyre.save();
+
+    res.status(200).json({
+      message: "Stock updated successfully",
+      tyre: existingTyre
+    });
+
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 const getAllTyres = async (req, res) => {
   try {
     const tyres = await Tyre.find();
@@ -109,195 +163,14 @@ const deleteTyre = async (req, res) => {
   }
 };
 
-// Increment stock quantity for a specific size
-const incrementStockQuantity = async (req, res) => {
-  const { id } = req.params;
-  const { size, quantity } = req.body;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid tyre ID" });
-  }
-
-  if (!size || !quantity) {
-    return res.status(400).json({
-      message: "Size and quantity are required",
-    });
-  }
-
-  try {
-    const tyre = await Tyre.findById(id);
-
-    if (!tyre) {
-      return res.status(404).json({ message: "Tyre not found" });
-    }
-
-    // Find the stock item with the matching size
-    const stockItem = tyre.stock.find((item) => item.size === size);
-
-    if (!stockItem) {
-      return res
-        .status(404)
-        .json({ message: `Size ${size} not found in stock` });
-    }
-
-    // Increment quantity
-    stockItem.quantity += Number(quantity);
-    await tyre.save();
-
-    res.status(200).json({
-      message: `Stock incremented successfully by ${quantity}`,
-      tyre,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Decrement stock quantity for a specific size
-const decrementStockQuantity = async (req, res) => {
-  const { id } = req.params;
-  const { size, quantity } = req.body;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid tyre ID" });
-  }
-
-  if (!size || !quantity) {
-    return res.status(400).json({
-      message: "Size and quantity are required",
-    });
-  }
-
-  try {
-    const tyre = await Tyre.findById(id);
-
-    if (!tyre) {
-      return res.status(404).json({ message: "Tyre not found" });
-    }
-
-    // Find the stock item with the matching size
-    const stockItem = tyre.stock.find((item) => item.size === size);
-
-    if (!stockItem) {
-      return res
-        .status(404)
-        .json({ message: `Size ${size} not found in stock` });
-    }
-
-    // Check if there's enough stock to decrement
-    if (stockItem.quantity < quantity) {
-      return res.status(400).json({
-        message: `Not enough stock. Current: ${stockItem.quantity}, Requested: ${quantity}`,
-      });
-    }
-
-    // Decrement quantity
-    stockItem.quantity -= Number(quantity);
-    await tyre.save();
-
-    res.status(200).json({
-      message: `Stock decremented successfully by ${quantity}`,
-      tyre,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Add a new size to stock with quantity
-const addNewSizeToStock = async (req, res) => {
-  const { id } = req.params;
-  const { size, quantity, price } = req.body;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid tyre ID" });
-  }
-
-  if (!size || !quantity || !price) {
-    return res.status(400).json({ message: "Size and quantity are required" });
-  }
-
-  try {
-    const tyre = await Tyre.findById(id);
-
-    if (!tyre) {
-      return res.status(404).json({ message: "Tyre not found" });
-    }
-
-    // Check if size already exists
-    const existingSize = tyre.stock.find((item) => item.size === size);
-
-    if (existingSize) {
-      return res.status(400).json({
-        message: `Size ${size} already exists in stock. Use increment operation instead.`,
-      });
-    }
-
-    // Add new size to stock
-    tyre.stock.push({ size, quantity: Number(quantity), price: Number(price) });
-    await tyre.save();
-
-    res.status(200).json({
-      message: "New size added to stock successfully",
-      tyre,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Update price for a specific size
-const updateSizePrice = async (req, res) => {
-  const { id } = req.params;
-  const { size, price } = req.body;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid tyre ID" });
-  }
-
-  if (!size || !price) {
-    return res.status(400).json({
-      message: "Size and price are required",
-    });
-  }
-
-  try {
-    const tyre = await Tyre.findById(id);
-
-    if (!tyre) {
-      return res.status(404).json({ message: "Tyre not found" });
-    }
-
-    // Find the stock item with the matching size
-    const stockItem = tyre.stock.find((item) => item.size === size);
-
-    if (!stockItem) {
-      return res
-        .status(404)
-        .json({ message: `Size ${size} not found in stock` });
-    }
-
-    // Update price
-    stockItem.price = Number(price);
-    await tyre.save();
-
-    res.status(200).json({
-      message: `Price updated successfully for size ${size}`,
-      tyre,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 module.exports = {
   createTyre,
   getAllTyres,
   getTyreById,
+  AddNewStocks,
   updateTyre,
   deleteTyre,
-  incrementStockQuantity,
-  decrementStockQuantity,
-  addNewSizeToStock,
-  updateSizePrice,
+
 };

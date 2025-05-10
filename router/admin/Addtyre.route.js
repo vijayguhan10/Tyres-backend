@@ -5,39 +5,18 @@ const {
   getTyreById,
   updateTyre,
   deleteTyre,
-  incrementStockQuantity,
-  decrementStockQuantity,
-  addNewSizeToStock,
-  updateSizePrice,
+  AddNewStocks
 } = require("../../Controllers/admin/Addtyre.controller");
 
 const router = express.Router();
 
 // Create a new tyre
 router.post("/", createTyre);
-
-// Get all tyres
+router.post("/edit", AddNewStocks);
 router.get("/", getAllTyres);
-
-// Get a single tyre by ID
 router.get("/:id", getTyreById);
-
-// Update a tyre
 router.put("/:id", updateTyre);
-
-// Delete a tyre
 router.delete("/:id", deleteTyre);
 
-// Increment stock quantity
-router.patch("/:id/stock/increment", incrementStockQuantity);
-
-// Decrement stock quantity
-router.patch("/:id/stock/decrement", decrementStockQuantity);
-
-// Add new size to stock
-router.post("/:id/stock/addsize", addNewSizeToStock);
-
-// Update price
-router.patch("/:id/stock/updateprice", updateSizePrice);
 
 module.exports = router;
