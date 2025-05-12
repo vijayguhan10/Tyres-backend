@@ -1,6 +1,6 @@
 const Shop = require("../../Models/shop/Shop");
 const Address = require("../../Models/Address");
-
+const Appointment = require("../../Models/client/Appointment");
 const createShop = async (req, res) => {
   console.log("shop : ", req.body);
   try {
@@ -57,7 +57,23 @@ const getShopByUserId = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const getshopmetadata = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const shop = await Shop.findOne({ userId: userId })
+      .populate("orders")
+      .populate("TyresRequested");
 
+    if (!shop) {
+      return res.status(404).json({ message: "Shop not found" });
+    }
+
+    res.status(200).json(shop);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 const getAllShops = async (req, res) => {
   try {
     const shops = await Shop.find()
@@ -96,9 +112,6 @@ const updateShop = async (req, res) => {
     const {
       _id,
       name,
-      address,
-      orders,
-      TyresRequested,
       adminNotes,
       phoneNumber,
       businessAddress,
@@ -110,20 +123,10 @@ const updateShop = async (req, res) => {
       daysOfOperation,
     } = req.body;
 
-    if (address) {
-      const validAddress = await Address.findById(address);
-      if (!validAddress) {
-        return res.status(404).json({ message: "Address not found" });
-      }
-    }
-
     const shop = await Shop.findByIdAndUpdate(
       _id,
       {
         name,
-        address,
-        orders,
-        TyresRequested,
         adminNotes,
         phoneNumber,
         businessAddress,
@@ -135,54 +138,41 @@ const updateShop = async (req, res) => {
         daysOfOperation,
       },
       { new: true }
-    )
-      .populate("orders")
-      .populate("TyresRequested");
+    );
 
     if (!shop) {
       return res.status(404).json({ message: "Shop not found" });
     }
-
-    res.status(200).json(shop);
+    console.log("sucessfully updated shop");
+    return res.status(200).json(shop);
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 const GetOrdersAssigned = async (req, res) => {
   try {
     const userid = req.user.userId;
     console.log("userid : ", userid);
-    
-    // Find shop and populate orders with appointment details
-    const shop = await Shop.findOne({ userId: userid })
-      .populate({
-        path: 'orders.orderId',
-        model: 'Appointment',
-        populate: [
-          {
-            path: 'addressId',
-            model: 'Address'
-          },
-          {
-            path: 'orderinfo',
-            model: 'ClientOrder',
-            strictPopulate: false, // Allow population of paths not in schema
-            populate: [
-              {
-                path: 'tyres',
-                model: 'Tyre',
-                strictPopulate: false // Allow population of tyres not in schema
-              },
-              {
-                path: 'services',
-                model: 'Service'
-              }
-            ]
-          }
-        ]
-      });
 
+    // Step 1: Find the shop and deeply populate appointment details
+    const shop = await Shop.findOne({ userId: userid }).populate({
+      path: "orders.orderId",
+      model: "Appointment",
+      populate: [
+        { path: "addressId", model: "Address" },
+        {
+          path: "orderinfo",
+          model: "ClientOrder",
+          populate: {
+            path: "orderItems.tyre",
+            model: "addtyre",
+            select: "model brand", // Only select model and brand fields from tyre
+          },
+        },
+      ],
+    });
+    // Step 2: Error handling if shop or orders not found
     if (!shop) {
       return res.status(404).json({ message: "Shop not found" });
     }
@@ -191,11 +181,137 @@ const GetOrdersAssigned = async (req, res) => {
       return res.status(404).json({ message: "No orders found" });
     }
 
-    // Return populated orders array
-    res.status(200).json(shop);
+    // Step 3: Divide orders into 'pending' and 'completed'
+    const pendingOrders = [];
+    const completedOrders = [];
 
+    for (const order of shop.orders) {
+      if (order.status === "pending") {
+        pendingOrders.push({
+          ...order.toObject(),
+          appointmentId: order.orderId._id, // Include appointment ID
+        });
+      } else if (order.status === "completed") {
+        completedOrders.push({
+          ...order.toObject(),
+          appointmentId: order.orderId._id, // Include appointment ID
+        });
+      }
+    }
+
+    // Step 4: Return the divided results with appointment IDs
+    res.status(200).json({
+      shopId: shop._id,
+      userId: shop.userId,
+      pendingOrders,
+      completedOrders,
+    });
   } catch (error) {
-    console.log(error.message);
+    console.error("Error in GetOrdersAssigned:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+const completeorder = async (req, res) => {
+  try {
+    const userid = req.user.userId;
+    const { appointmentid, orderid } = req.body;
+    console.log("userid : ", userid);
+    console.log("appointmentid : ", appointmentid);
+    console.log("orderid : ", orderid);
+
+    // Find shop and validate
+    const shop = await Shop.findOne({ userId: userid });
+    if (!shop) {
+      return res.status(404).json({ message: "Shop not found" });
+    }
+
+    // Find and update order status in shop
+    const orderIndex = shop.orders.findIndex(
+      (order) => order.orderId.toString() === orderid
+    );
+    if (orderIndex === -1) {
+      return res.status(404).json({ message: "Order not found in shop" });
+    }
+    shop.orders[orderIndex].status = "completed";
+
+    // Find appointment and validate
+    const appointment = await Appointment.findById(appointmentid);
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+
+    // Update appointment status
+    appointment.orderstatus = "completed";
+
+    // Save both documents
+    await Promise.all([shop.save(), appointment.save()]);
+
+    return res.status(200).json({
+      message: "Order completed successfully",
+      shop: shop.orders[orderIndex],
+      appointment: appointment,
+    });
+  } catch (error) {
+    console.error("Error completing order:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+const getrequestedtyresall = async (req, res) => {
+  try {
+    const userid = req.user.userId;
+    console.log("userid : ", userid);
+
+    // Find shop and populate tyre request details
+    const shop = await Shop.findOne({ userId: userid }).populate({
+      path: "TyresRequested",
+      populate: {
+        path: "specification.tyreId",
+        model: "addtyre",
+        select: "brand model type vehicleType loadIndex speedRating price",
+      },
+    });
+
+    if (!shop) {
+      return res.status(404).json({ message: "Shop not found" });
+    }
+
+    if (!shop.TyresRequested || shop.TyresRequested.length === 0) {
+      return res.status(404).json({ message: "No tyre requests found" });
+    }
+
+    // Format the response with required tyre details
+    const formattedRequests = shop.TyresRequested.map((request) => ({
+      requestId: request._id,
+      userId: request.userId,
+      ShopId: request.ShopId,
+      status: request.status,
+      deleterequest: request.deleterequest,
+      comments: request.comments,
+      price: request.price || 0,
+      createdAt: request.createdAt,
+      updatedAt: request.updatedAt,
+      specifications: request.specification.map((spec) => ({
+        size: spec.size,
+        quantity: spec.quantity,
+        tyreDetails: spec.tyreId
+          ? {
+              brand: spec.tyreId.brand,
+              model: spec.tyreId.model,
+              type: spec.tyreId.type,
+              vehicleType: spec.tyreId.vehicleType,
+              loadIndex: spec.tyreId.loadIndex,
+              speedRating: spec.tyreId.speedRating,
+            }
+          : null,
+      })),
+    }));
+
+    res.status(200).json({
+      shopId: shop._id,
+      tyreRequests: formattedRequests,
+    });
+  } catch (error) {
+    console.error("Error fetching tyre requests:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -206,4 +322,7 @@ module.exports = {
   getAllShops,
   GetShopStocks,
   GetOrdersAssigned,
+  getshopmetadata,
+  completeorder,
+  getrequestedtyresall,
 };
