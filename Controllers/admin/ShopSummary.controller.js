@@ -1,9 +1,14 @@
 const Shop = require('../../Models/shop/Shop');
 const Tyre = require('../../Models/admin/Addtyre'); 
-
 exports.getAllShops = async (req, res) => {
     try {
-        const shops = await Shop.find({}).select('-__v'); // Exclude version key
+        const shops = await Shop.find({})
+            .select('-__v')
+            .populate({
+                path: 'userId',
+                select: 'name email phone' 
+            }); 
+
         res.status(200).json({
             success: true,
             count: shops.length,

@@ -109,7 +109,7 @@ const AdminSummary = async (req, res) => {
       .lean();
 
     const completedAppointments = await Appointment.find({
-      orderstatus: "completed",
+      orderstatus: "Approved",
     })
       .populate(populateOptions)
       .lean();

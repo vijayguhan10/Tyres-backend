@@ -41,7 +41,7 @@ const loginUser = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-
+    
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
@@ -51,7 +51,6 @@ const loginUser = async (req, res) => {
     if (user.role !== role) {
       return res.status(403).json({ message: "Unauthorized role access" });
     }
-
     const token = generateToken(user._id, user.role);
     res.status(200).json({ message: "Login successful", token });
   } catch (error) {

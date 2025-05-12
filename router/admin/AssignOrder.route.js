@@ -16,7 +16,6 @@ router.post(
   "/adminassign/reducetyres",
   async (req, res, next) => {
     try {
-      // Extract necessary data from request
       const { ShopId, specification, appointmentId, clientOrderId } = req.body;
 
       // Validate required fields

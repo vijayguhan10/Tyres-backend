@@ -1,5 +1,30 @@
 const mongoose = require("mongoose");
-
+const ShopStockSchema = new mongoose.Schema(
+  {
+    tyreId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "addtyre",
+      required: true,
+    },
+    sizes: [
+      {
+        size: {
+          type: String,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+  },
+  { _id: false }
+);
 const ShopSchema = new mongoose.Schema(
   {
     userId: {
@@ -35,31 +60,10 @@ const ShopSchema = new mongoose.Schema(
       },
     ],
 
-    ShopStocks: [
-      {
-        tyreId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "addtyre",
-          required: true,
-        },
-        sizes: [
-          {
-            size: {
-              type: String,
-              required: true,
-            },
-            quantity: {
-              type: Number,
-              required: true,
-            },
-            price: {
-              type: Number,
-              required: true,
-            },
-          },
-        ],
-      },
-    ],
+    ShopStocks: {
+      type: [ShopStockSchema],
+      default: [],
+    },
 
     adminNotes: {
       type: String,
