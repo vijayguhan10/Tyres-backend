@@ -26,7 +26,7 @@ const createUser = async (req, res) => {
     const token = generateToken(newUser._id, newUser.role);
     res
       .status(201)
-      .json({ message: "User created successfully", token, user: newUser });
+      .json({ message: "User created successfully", token, userName: user.name });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
@@ -41,7 +41,7 @@ const loginUser = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    
+
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
@@ -52,7 +52,7 @@ const loginUser = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized role access" });
     }
     const token = generateToken(user._id, user.role);
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({ message: "Login successful", token, userName: user.name });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
