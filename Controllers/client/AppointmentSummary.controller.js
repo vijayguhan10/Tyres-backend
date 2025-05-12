@@ -31,7 +31,7 @@ const getUserAppointments = async (req, res) => {
 
     const upcomingAppointments = await Appointment.find({
       userId,
-      orderstatus: "pending",
+      orderstatus: ["pending", "Approved"]
     })
       .populate(populateOptions)
       .lean();
@@ -121,7 +121,7 @@ const AdminSummary = async (req, res) => {
       .lean();
 
     const issueAppointments = await Appointment.find({
-      status: "issues",
+      orderStatus: "issue",
     })
       .populate(populateOptions)
       .lean();
