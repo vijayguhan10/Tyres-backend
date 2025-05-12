@@ -10,15 +10,13 @@ const createShop = async (req, res) => {
       adminNotes,
       phoneNumber,
       businessAddress,
-
+      pincode,
       region,
       noOfStaff,
       openingTime,
       closingTime,
       daysOfOperation,
     } = req.body;
-    let pincode = "5543333";
-   
 
     const newShop = new Shop({
       userId,
@@ -76,11 +74,27 @@ const getAllShops = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const GetShopStocks = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    console.log("userId : ", userId);
+    const shop = await Shop.findOne({ userId: userId });
+    if (!shop) {
+      return res.status(404).json({ message: "Shop not found" });
+    }
 
+    // Return only the shopStocks data
+    res.status(200).json({ shopStocks: shop.ShopStocks });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 const updateShop = async (req, res) => {
+  console.log("shop : ", req.body);
   try {
     const {
-      userId,
+      _id,
       name,
       address,
       orders,
@@ -103,8 +117,8 @@ const updateShop = async (req, res) => {
       }
     }
 
-    const shop = await Shop.findOneAndUpdate(
-      { userId },
+    const shop = await Shop.findByIdAndUpdate(
+      _id,
       {
         name,
         address,
@@ -122,7 +136,6 @@ const updateShop = async (req, res) => {
       },
       { new: true }
     )
-      .populate("address")
       .populate("orders")
       .populate("TyresRequested");
 
@@ -136,10 +149,61 @@ const updateShop = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const GetOrdersAssigned = async (req, res) => {
+  try {
+    const userid = req.user.userId;
+    console.log("userid : ", userid);
+    
+    // Find shop and populate orders with appointment details
+    const shop = await Shop.findOne({ userId: userid })
+      .populate({
+        path: 'orders.orderId',
+        model: 'Appointment',
+        populate: [
+          {
+            path: 'addressId',
+            model: 'Address'
+          },
+          {
+            path: 'orderinfo',
+            model: 'ClientOrder',
+            strictPopulate: false, // Allow population of paths not in schema
+            populate: [
+              {
+                path: 'tyres',
+                model: 'Tyre',
+                strictPopulate: false // Allow population of tyres not in schema
+              },
+              {
+                path: 'services',
+                model: 'Service'
+              }
+            ]
+          }
+        ]
+      });
 
+    if (!shop) {
+      return res.status(404).json({ message: "Shop not found" });
+    }
+
+    if (!shop.orders || shop.orders.length === 0) {
+      return res.status(404).json({ message: "No orders found" });
+    }
+
+    // Return populated orders array
+    res.status(200).json(shop);
+
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 module.exports = {
   createShop,
   getShopByUserId,
   updateShop,
   getAllShops,
+  GetShopStocks,
+  GetOrdersAssigned,
 };
