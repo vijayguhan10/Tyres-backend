@@ -39,7 +39,7 @@ app.use(
 //   next();
 // });
 app.get("/awshelath", (req, res) => {
-  res.send("<h1>Aws Health Check</h1>");
+  res.status(200).send("<h1>Aws Health Check</h1>");
 }
 );
 app.use(express.urlencoded({ extended: true }));
