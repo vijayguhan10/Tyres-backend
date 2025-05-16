@@ -38,6 +38,10 @@ app.use(
 //   console.log("Incoming headers:", req.headers);
 //   next();
 // });
+app.get("/awshelath", (req, res) => {
+  res.send("<h1>Aws Health Check</h1>");
+}
+);
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRoutes);
 app.use("/api/address", AddressRoutes);

@@ -19,6 +19,7 @@ const getCoordinates = async (pincode) => {
         },
       }
     );
+    console.log(response.data);
     if (response.data.records && response.data.records.length > 0) {
       const record = response.data.records[0];
       if (record.latitude && record.longitude) {

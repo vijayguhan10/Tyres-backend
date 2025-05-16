@@ -2,7 +2,7 @@ const TyreRequest = require("../../Models/shop/RequestTyres");
 const Tyre = require("../../Models/admin/Addtyre");
 const Shop = require("../../Models/shop/Shop");
 const clientOrder = require("../../Models/client/OrderTyre");
-const Appointment = require("../../Models/client/Appointment"); // Make sure to require your Appointment model
+const Appointment = require("../../Models/client/Appointment"); 
 
 exports.createTyreRequest = async (req, res, next) => {
   try {
@@ -210,7 +210,7 @@ exports.updateOrderStatuses = async (req, res, next) => {
 exports.finalResponse = async (req, res) => {
   try {
     const { tyreRequest } = req.tyreRequestData;
-
+    console.log("reached final response")
     res.status(201).json({
       message: "Tyre request processed successfully",
       data: {
