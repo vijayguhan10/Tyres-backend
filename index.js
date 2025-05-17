@@ -8,7 +8,7 @@ const AddressRoutes = require("./router/Address.route");
 const OrderTyres_clients = require("./router/client/Index.route");
 const AdminRouter = require("./router/admin/Index.route");
 const ShopRouter = require("./router/shop/Index.route");
-
+const carwashRoutes = require("./router/carwash/Index.route");
 const morgan = require("morgan");
 dotenv.config();
 const app = express();
@@ -33,11 +33,6 @@ app.use(
     exposedHeaders: ["set-cookie"],
   })
 );
-// app.use((req, res, next) => {
-//   console.log("Incoming cookies:", req.cookies);
-//   console.log("Incoming headers:", req.headers);
-//   next();
-// });
 app.get("/awshelath", (req, res) => {
   res.status(200).send("<h1>Aws Health Check</h1>");
 }
@@ -48,6 +43,7 @@ app.use("/api/address", AddressRoutes);
 app.use("/api/client", OrderTyres_clients);
 app.use("/api/admin", AdminRouter);
 app.use("/api", ShopRouter);
+app.use("/api", carwashRoutes);
 app.use(morgan("dev"));
 console.log("h");
 ConnectDb();
