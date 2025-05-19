@@ -167,7 +167,7 @@ const GetOrdersAssigned = async (req, res) => {
           populate: {
             path: "orderItems.tyre",
             model: "addtyre",
-            select: "model brand", // Only select model and brand fields from tyre
+            select: "model brand stock",
           },
         },
       ],
