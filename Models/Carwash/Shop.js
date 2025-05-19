@@ -15,6 +15,14 @@ const ShopSchema = new mongoose.Schema(
 
     orders: [
       {
+        appointmentDate: {
+          type: Date,
+          required: true
+        },
+        appointmentTime: {
+          type: String,
+          required: true
+        },
         orderId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
@@ -64,9 +72,29 @@ const ShopSchema = new mongoose.Schema(
     daysOfOperation: {
       type: [String],
     },
+
+    userReviews: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        review: {
+          type: Number,
+          min: 1,
+          max: 5,
+          required: true,
+        },
+        description: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
 
-const Shop = mongoose.model("Shop", ShopSchema);
+const Shop = mongoose.model("carwash", ShopSchema);
 module.exports = Shop;

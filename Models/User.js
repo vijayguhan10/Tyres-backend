@@ -16,7 +16,13 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["client", "admin", "fitment-center"],
+    enum: ["client", "admin", "fitment-center", "carwash"],
+    required: true,
+  },
+  levellogin: {
+    type: String,
+    enum: ["enterprice", "individual", "notmention"],
+    default: "notmention",
     required: true,
   },
 });

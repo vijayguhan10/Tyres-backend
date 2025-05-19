@@ -6,7 +6,8 @@ const { rolecheck } = require("../../Utils/Role");
 const AssignShopsInfo = require("./Distance.route");
 const ShopSummary = require("./ShopSummary.route");
 const TyreRequests = require("./TyreRequests.route");
-const report=require("./Report.route")
+const Carwash = require("./Carwash.route");
+const report = require("./Report.route");
 const route = express.Router();
 console.log("Index route");
 route.use("/addtyre", authenticateJWT, AddtyreRoutes);
@@ -19,5 +20,6 @@ route.use(
   AssignShopsInfo
 );
 route.use("/tyrerequests", authenticateJWT, rolecheck("admin"), TyreRequests);
-route.use("/report",authenticateJWT,rolecheck("admin"),report)
+route.use("/report", authenticateJWT, rolecheck("admin"), report);
+route.use("/carwash", authenticateJWT, rolecheck("admin"), Carwash);
 module.exports = route;
