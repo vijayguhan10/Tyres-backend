@@ -160,6 +160,7 @@ const GetOrdersAssigned = async (req, res) => {
       path: "orders.orderId",
       model: "Appointment",
       populate: [
+        { path: "userId", model: "User", select: "name" },
         { path: "addressId", model: "Address" },
         {
           path: "orderinfo",
