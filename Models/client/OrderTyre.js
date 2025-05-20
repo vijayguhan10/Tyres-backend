@@ -24,6 +24,10 @@ const OrderItemSchema = new mongoose.Schema(
       min: 1,
       default: 1
     },
+    price: {
+      type: Number,
+      required: true
+    },
   },
   { _id: false }
 );
@@ -38,7 +42,7 @@ const TyreInfoSchema = new mongoose.Schema(
     orderItems: [OrderItemSchema],
     status: {
       type: String,
-      enum: ["Pending", "Completed","Approved","Rejected"],
+      enum: ["Pending", "Completed", "Approved", "Rejected"],
       default: "Pending",
       required: true,
     },
@@ -47,6 +51,12 @@ const TyreInfoSchema = new mongoose.Schema(
       default: false,
       required: true,
     },
+    clientType: {
+      type: String,
+      enum: ["enterprice", "individual", "notmention"],
+      default: "notmention",
+      required: true,
+    }
   },
   { timestamps: true }
 );

@@ -68,7 +68,8 @@ async function validateOrderItems(orderItems) {
       throw new Error(`Size ${item.size} not found for ${tyre.brand} ${tyre.model}`);
     }
     
-    // Stock quantity check removed
+    // Stock quantity check remove
+    item.price = stockItem.price;
   }
 
   return tyres;
@@ -78,6 +79,7 @@ const createTyreInfo = async (req, res) => {
   console.log("Request body for ordering tyres:", req.body);
   try {
     const { orderItems } = req.body;
+    const clientType = req.user.levellogin;
 
     await validateOrderItems(orderItems);
 
@@ -85,6 +87,7 @@ const createTyreInfo = async (req, res) => {
       userId: req.user.userId,
       orderItems: orderItems,
       status: req.body.status || "Pending",
+      clientType: clientType,
     });
     
     const savedTyreInfo = await newTyreInfo.save();
