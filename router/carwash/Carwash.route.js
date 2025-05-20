@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Carwash = require("../../Controllers/Carwash/Carwash.controller");
+const { authenticateJWT } = require("../../Controllers/User.controller");
 
 // Create a new shop
 
@@ -14,5 +15,6 @@ router.post("/order", Carwash.addOrderToShop);
 
 // Change the status of an order in a shop
 router.patch("/order/status", Carwash.changeOrderStatus);
-
+router.post("/addreview/:shopId",authenticateJWT, Carwash.postReviewToShop);
+router.post("/postorders/:shopId", authenticateJWT,Carwash.placeOrderToShop);
 module.exports = router;

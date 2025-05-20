@@ -35,7 +35,6 @@ const ShopSchema = new mongoose.Schema(
         },
       },
     ],
-
     description: {
       type: String,
       default: "",
