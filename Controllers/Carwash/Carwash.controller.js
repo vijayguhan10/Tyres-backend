@@ -54,8 +54,6 @@ const placeOrderToShop = async (req, res) => {
     const { shopId } = req.params;
     const { userId } = req.user;
     const { appointmentDate, appointmentTime } = req.body;
-    console.log("shopId : ", shopId);
-    console.log("request body : ", req.body);
 
     if (!userId) {
       return res.status(400).json({ error: "userId is required" });
@@ -80,7 +78,7 @@ const placeOrderToShop = async (req, res) => {
       appointmentTime: appointmentTime,
     };
 
-    // Update orders array using $push operator to ensure proper validation
+    // Update orders array and get the new order's _id
     const updatedShop = await Shop.findByIdAndUpdate(
       shopId,
       { $push: { orders: newOrder } },
@@ -96,14 +94,11 @@ const placeOrderToShop = async (req, res) => {
         .json({ error: "Failed to update shop with new order" });
     }
 
+    // Get the _id of the newly created order
+    const newOrderId = updatedShop.orders[updatedShop.orders.length - 1]._id;
+
     return res.status(200).json({
-      message: "Order placed successfully",
-      shop: updatedShop,
-      appointmentDetails: {
-        date: appointmentDate,
-        time: appointmentTime,
-        washType: newOrder.washType,
-      },
+      orderid: newOrderId
     });
   } catch (error) {
     console.error("Error placing order:", error);
