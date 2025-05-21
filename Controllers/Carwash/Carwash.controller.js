@@ -1,23 +1,4 @@
-const Shop = require("../../Models/shop/Shop");
-const createShop = async (req, res) => {
-  try {
-    const shop = new Shop(req.body);
-    await shop.save();
-    res.status(201).json(shop);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-// Get all shops
-const getAllShops = async (req, res) => {
-  try {
-    const shops = await Shop.find();
-    res.status(200).json(shops);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+const Shop = require("../../Models/Carwash/Shop");
 
 // Get a shop by ID
 const getShopById = async (req, res) => {
@@ -27,32 +8,6 @@ const getShopById = async (req, res) => {
       return res.status(404).json({ message: "Shop not found" });
     }
     res.status(200).json(shop);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Update a shop by ID
-const updateShop = async (req, res) => {
-  try {
-    const shop = await Shop.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!shop) {
-      return res.status(404).json({ message: "Shop not found" });
-    }
-    res.status(200).json(shop);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-// Delete a shop by ID
-const deleteShop = async (req, res) => {
-  try {
-    const shop = await Shop.findByIdAndDelete(req.params.id);
-    if (!shop) {
-      return res.status(404).json({ message: "Shop not found" });
-    }
-    res.status(200).json({ message: "Shop deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -82,7 +37,7 @@ const changeOrderStatus = async (req, res) => {
     if (!shop) {
       return res.status(404).json({ message: "Shop not found" });
     }
-    const order = shop.orders.find(o => o.orderId.toString() === orderId);
+    const order = shop.orders.find((o) => o.orderId.toString() === orderId);
     if (!order) {
       return res.status(404).json({ message: "Order not found in shop" });
     }
@@ -94,12 +49,122 @@ const changeOrderStatus = async (req, res) => {
   }
 };
 
+const placeOrderToShop = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+    const { userId } = req.user;
+    const { appointmentDate, appointmentTime } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+
+    if (!appointmentDate || !appointmentTime) {
+      return res
+        .status(400)
+        .json({ error: "appointmentDate and appointmentTime are required" });
+    }
+
+    const shop = await Shop.findById(shopId);
+    if (!shop) {
+      return res.status(404).json({ error: "Shop not found" });
+    }
+
+    // Create new order object with all required fields
+    const newOrder = {
+      orderId: userId,
+      status: "pending",
+      appointmentDate: new Date(appointmentDate),
+      appointmentTime: appointmentTime,
+    };
+
+    // Update orders array and get the new order's _id
+    const updatedShop = await Shop.findByIdAndUpdate(
+      shopId,
+      { $push: { orders: newOrder } },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedShop) {
+      return res
+        .status(500)
+        .json({ error: "Failed to update shop with new order" });
+    }
+
+    // Get the _id of the newly created order
+    const newOrderId = updatedShop.orders[updatedShop.orders.length - 1]._id;
+
+    return res.status(200).json({
+      orderid: newOrderId
+    });
+  } catch (error) {
+    console.error("Error placing order:", error);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        error: "Validation Error",
+        details: Object.values(error.errors).map((err) => err.message),
+      });
+    }
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const postReviewToShop = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+    const { review, description } = req.body;
+    const { userId } = req.user;
+
+    // Input validation
+    if (!userId || typeof review !== "number") {
+      return res
+        .status(400)
+        .json({ error: "userId and numeric review are required." });
+    }
+
+    // Find and update shop using findByIdAndUpdate to avoid validation issues
+    const updatedShop = await Shop.findByIdAndUpdate(
+      shopId,
+      {
+        $push: {
+          userReviews: { userId, review, description },
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+        context: "query",
+      }
+    );
+
+    if (!updatedShop) {
+      return res.status(404).json({ error: "Shop not found" });
+    }
+
+    return res.status(200).json({
+      message: "Review added successfully",
+      shop: updatedShop,
+    });
+  } catch (error) {
+    console.error("Error posting review:", error);
+
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        error: "Validation Error",
+        details: Object.values(error.errors).map((err) => err.message),
+      });
+    }
+
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 module.exports = {
-  createShop,
-  getAllShops,
   getShopById,
-  updateShop,
-  deleteShop,
+  placeOrderToShop,
+  postReviewToShop,
   addOrderToShop,
-  changeOrderStatus
+  changeOrderStatus,
 };

@@ -4,24 +4,36 @@ const Tyres = require("../../Models/admin/Addtyre");
 exports.createTyreRequest = async (req, res) => {
   console.log("createTyreRequest", req.body);
   try {
-    const { ShopId } = req.body;
-    // Validate ShopId
-    const shop = await Shop.findById(ShopId);
+    const {userId} = req.user;
+    
+    // Find shop by userId instead of ShopId
+    const shop = await Shop.findOne({ userId: userId });
     if (!shop) {
-      return res.status(404).json({ error: "Shop not found" });
+      return res.status(404).json({ error: "Shop not found for this user" });
     }
-    const tyreRequest = await TyreRequest.create(req.body);
+
+    // Create tyre request with shop's ID
+    const tyreRequestData = {
+      userId,
+      ...req.body,
+      ShopId: shop._id // Ensure ShopId is set from found shop
+    };
+    
+    const tyreRequest = await TyreRequest.create(tyreRequestData);
+    
+    // Update shop's TyresRequested array
     shop.TyresRequested.push(tyreRequest._id);
     await shop.save();
-    res
-      .status(201)
-      .json({ message: "Tyre request created", data: tyreRequest });
+
+    res.status(201).json({ 
+      message: "Tyre request created", 
+      data: tyreRequest 
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
 };
-
 exports.getTyreRequestById = async (req, res) => {
   try {
     const request = await TyreRequest.findById(req.params.id);
