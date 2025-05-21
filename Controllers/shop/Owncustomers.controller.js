@@ -1,6 +1,5 @@
 const OwnCustomer = require("../../Models/shop/Owncustomers");
-
-// Create or update customer (add order to orderHistory if exists)
+const Shops = require("../../Models/shop/Shop");
 const createOrUpdateOwnCustomer = async (req, res) => {
   try {
     const {
@@ -10,53 +9,73 @@ const createOrUpdateOwnCustomer = async (req, res) => {
       address,
       phoneNumber,
       vehicleNumber,
-      orderHistory, 
+      orderHistory, // This should be an object with items, totalAmount, etc.
     } = req.body;
 
-    if (
-      !name ||
-      !addressProof ||
-      !pincode ||
-      !address ||
-      !phoneNumber ||
-      !orderHistory
-    ) {
+    // Basic validation
+    console.log("Received data:", req.body);
+    if (!name || !addressProof || !pincode || !address || !phoneNumber || !orderHistory || !orderHistory.items) {
+      console.log("Validation failed");
+
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Find customer by name and vehicleNumber (adjust as needed)
+    // Find existing customer
     let customer = await OwnCustomer.findOne({ name, phoneNumber });
 
     if (customer) {
-      // Add new order to orderHistory array
-      customer.orderHistory.push(orderHistory);
-      await customer.save();
-      return res
-        .status(200)
-        .json({ message: "Order added to existing customer", customer });
-    } else {
-      // Create new customer
-      const newCustomer = new OwnCustomer({
-        name,
-        addressProof,
-        pincode,
-        phoneNumber,
-        address,
-        vehicleNumber,
-        orderHistory: [orderHistory],
+      // Append new order (with items array) to order history
+      customer.orderHistory.push({
+        items: orderHistory.items, // expects array of items
+        totalAmount: orderHistory.totalAmount,
+        orderDate: orderHistory.orderDate || Date.now(),
       });
-      await newCustomer.save();
-      return res
-        .status(201)
-        .json({ message: "Customer created", customer: newCustomer });
+      await customer.save();
+      return res.status(200).json({
+        message: "Order added to existing customer",
+        customer,
+      });
     }
+
+    // Create new customer
+    const newCustomer = new OwnCustomer({
+      name,
+      addressProof,
+      pincode,
+      address,
+      phoneNumber,
+      vehicleNumber,
+      orderHistory: [{
+        items: orderHistory.items,
+        totalAmount: orderHistory.totalAmount,
+        orderDate: orderHistory.orderDate || Date.now(),
+      }],
+    });
+
+    await newCustomer.save();
+
+    // Link customer to shop
+    const { userId } = req.user;
+    const shop = await Shops.findOne({ userId });
+    if (!shop) {
+      return res.status(404).json({ message: "Shop not found for this user" });
+    }
+
+    shop.OwnCustomers.push(newCustomer._id);
+    await shop.save();
+
+    return res.status(201).json({
+      message: "Customer created and linked to shop",
+      customer: newCustomer,
+    });
+
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: error.message });
+    console.error("Error creating/updating customer:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// Get all customers
+
 const getAllOwnCustomers = async (req, res) => {
   try {
     const customers = await OwnCustomer.find();

@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
-
-const OrderHistorySchema = new mongoose.Schema(
+const OrderItemSchema = new mongoose.Schema(
   {
-    orderId: {
+    tyreid: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
     },
@@ -31,6 +30,24 @@ const OrderHistorySchema = new mongoose.Schema(
   },
   { _id: false }
 );
+const OrderHistorySchema = new mongoose.Schema(
+  {
+    items: {
+      type: [OrderItemSchema], // CHANGED: 1D array of items
+      required: true,
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    orderDate: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: true }
+);
 
 const OwnCustomerSchema = new mongoose.Schema(
   {
@@ -55,7 +72,11 @@ const OwnCustomerSchema = new mongoose.Schema(
       required: true,
     },
 
-    orderHistory: [OrderHistorySchema],
+    orderHistory: {
+      timestamps: true,
+      type: [OrderHistorySchema],
+      default: [],
+    },
   },
   { timestamps: true }
 );

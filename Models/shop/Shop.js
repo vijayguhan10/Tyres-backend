@@ -104,13 +104,23 @@ const ShopSchema = new mongoose.Schema(
       type: [String],
     },
 
-    OwnInventory: {
-      type:mongoose.Schema.Types.ObjectId,
-      ref:"Owninventory",
-      default: [],
-    },
+    OwnInventory: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Owninventory",
+        default: [],
+      },
+    ],
+    OwnCustomers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "fitmentclient",
+        default: [],
+      },
+    ],
   },
-  { timestamps: true } 
+
+  { timestamps: true }
 );
 
 const Shop = mongoose.model("Shop", ShopSchema);

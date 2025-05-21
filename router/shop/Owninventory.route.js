@@ -6,7 +6,7 @@ const OwnInventoryController = require("../../Controllers/shop/Owninventory.cont
 router.post("/", OwnInventoryController.createOwnInventory);
 
 // Get all inventories
-router.get("/", OwnInventoryController.getAllOwnInventory);
+router.get("/getall", OwnInventoryController.getAllOwnInventory);
 
 // Get inventory by ID
 router.get("/:id", OwnInventoryController.getOwnInventoryById);
