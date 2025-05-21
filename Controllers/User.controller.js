@@ -68,7 +68,12 @@ const loginUser = async (req, res) => {
     }
     const token = generateToken(user._id, user.role, user.levellogin);
     console.log("token : ", token);
-    res.status(200).json({ message: "Login successful", token,levellogin:user.levellogin });
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      levellogin: user.levellogin,
+      userName: user.name,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }

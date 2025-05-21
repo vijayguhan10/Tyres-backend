@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const OwnInventory = require("./Owninventory");
+const fitmentclient = require("./Owncustomers");
 const ShopStockSchema = new mongoose.Schema(
   {
     tyreId: {
@@ -101,7 +103,23 @@ const ShopSchema = new mongoose.Schema(
     daysOfOperation: {
       type: [String],
     },
+
+    OwnInventory: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Owninventory",
+        default: [],
+      },
+    ],
+    OwnCustomers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "fitmentclient",
+        default: [],
+      },
+    ],
   },
+
   { timestamps: true }
 );
 
