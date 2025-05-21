@@ -1,33 +1,25 @@
 const axios = require("axios");
 const Shop = require("../../Models/shop/Shop");
 
-// Fetch coordinates using India Postal API
+// Fetch coordinates using OpenWeatherMap API
 const getCoordinates = async (pincode) => {
   try {
-    const apiKey = "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b";
+    const openWeatherApiKey = "4b9b8688eca407ea3546cf525c8f03cb";
     const response = await axios.get(
-      `https://api.data.gov.in/resource/5c2f62fe-5afa-4119-a499-fec9d604d5bd`,
+      `http://api.openweathermap.org/geo/1.0/zip`,
       {
         params: {
-          "api-key": apiKey,
-          format: "json",
-          "filters[pincode]": pincode,
-          limit: 1,
-        },
-        headers: {
-          accept: "application/json",
+          zip: `${pincode},IN`,
+          appid: openWeatherApiKey,
         },
       }
     );
-    console.log(response.data);
-    if (response.data.records && response.data.records.length > 0) {
-      const record = response.data.records[0];
-      if (record.latitude && record.longitude) {
-        return {
-          latitude: parseFloat(record.latitude),
-          longitude: parseFloat(record.longitude),
-        };
-      }
+
+    if (response.data.lat && response.data.lon) {
+      return {
+        latitude: response.data.lat,
+        longitude: response.data.lon,
+      };
     }
     console.log(`No coordinates found for pincode: ${pincode}`);
     return null;

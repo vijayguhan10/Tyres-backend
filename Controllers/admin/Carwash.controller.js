@@ -91,10 +91,33 @@ const getShopById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// Get carwash summary by shop
+const getCarwashSummaryByShop = async (req, res) => {
+  try {
+    const shops = await Shop.find({}, 'name orders');
+    if (!shops || shops.length === 0) {
+      return res.status(404).json({ message: "No shops found" });
+    }
+
+    const summary = shops.map(shop => {
+      const completedOrders = shop.orders.filter(order => order.status === 'completed').length;
+      return {
+        shopName: shop.name,
+        completedCarwashes: completedOrders
+      };
+    });
+
+    res.status(200).json(summary);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createShop,
   updateShop,
   deleteShop,
   getAllShops,
   getShopById,
+  getCarwashSummaryByShop
 };

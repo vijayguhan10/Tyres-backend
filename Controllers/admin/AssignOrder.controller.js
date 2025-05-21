@@ -2,7 +2,7 @@ const TyreRequest = require("../../Models/shop/RequestTyres");
 const Tyre = require("../../Models/admin/Addtyre");
 const Shop = require("../../Models/shop/Shop");
 const clientOrder = require("../../Models/client/OrderTyre");
-const Appointment = require("../../Models/client/Appointment"); 
+const Appointment = require("../../Models/client/Appointment");
 
 exports.createTyreRequest = async (req, res, next) => {
   try {
@@ -66,7 +66,7 @@ exports.createTyreRequest = async (req, res, next) => {
       approvedSpecs,
       totalPrice,
       pushtire,
-      ShopId
+      ShopId,
     };
 
     next();
@@ -80,9 +80,9 @@ exports.handlePushTireUpdate = async (req, res, next) => {
   if (!req.tyreRequestData.pushtire) return next();
 
   try {
-    const { tyreRequest, approvedSpecs ,ShopId} = req.tyreRequestData;
+    const { tyreRequest, approvedSpecs, ShopId } = req.tyreRequestData;
     // console.log("shopId 11111",tyreRequest.ShopId )
-    tyreRequest.status = "Approved";
+    tyreRequest.status = "fitment-push";
     await tyreRequest.save();
 
     const shop = await Shop.findById(ShopId);
@@ -186,10 +186,17 @@ exports.handelreducetyes = async (req, res, next) => {
 
 exports.updateOrderStatuses = async (req, res, next) => {
   try {
-    // Update client order status
+    const currentOrder = await clientOrder.findById(req.body.clientOrderId);
+    if (!currentOrder) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
     await clientOrder.findByIdAndUpdate(
       req.body.clientOrderId,
-      { status: "Approved" },
+      {
+        status: "Approved",
+        totalPrice: currentOrder.totalPrice,
+      },
       { new: true }
     );
 
@@ -210,7 +217,7 @@ exports.updateOrderStatuses = async (req, res, next) => {
 exports.finalResponse = async (req, res) => {
   try {
     const { tyreRequest } = req.tyreRequestData;
-    console.log("reached final response")
+    console.log("reached final response");
     res.status(201).json({
       message: "Tyre request processed successfully",
       data: {
