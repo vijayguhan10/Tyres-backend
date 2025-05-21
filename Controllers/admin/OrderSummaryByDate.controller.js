@@ -68,6 +68,7 @@ const getOrderSummaryByDateForMonth = async (req, res) => {
         vehicles: vehicles.length > 0 ? vehicles : "No vehicle",
         shopName,
         doorstepService: true,
+        totalPrice: order.totalPrice || 0,
       });
     }
 

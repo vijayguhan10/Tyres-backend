@@ -186,10 +186,17 @@ exports.handelreducetyes = async (req, res, next) => {
 
 exports.updateOrderStatuses = async (req, res, next) => {
   try {
-    // Update client order status
+    const currentOrder = await clientOrder.findById(req.body.clientOrderId);
+    if (!currentOrder) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
     await clientOrder.findByIdAndUpdate(
       req.body.clientOrderId,
-      { status: "Approved" },
+      {
+        status: "Approved",
+        totalPrice: currentOrder.totalPrice,
+      },
       { new: true }
     );
 

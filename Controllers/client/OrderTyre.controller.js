@@ -1,5 +1,5 @@
 const TyreInfo = require("../../Models/client/OrderTyre");
-const addtyre= require("../../Models/admin/Addtyre");
+const addtyre = require("../../Models/admin/Addtyre");
 const mongoose = require("mongoose");
 
 // These functions are no longer needed since we're not checking stock
@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 //   const tyre = await Tyre.findById(tyreId);
 
 //   if (!tyre) throw new Error("Tyre not found");
-//   
+//
 //   if (tyre.quantity < quantity) {
 //     throw new Error(
 //       `Not enough stock. Available: ${tyre.quantity}`
@@ -32,42 +32,48 @@ async function validateOrderItems(orderItems) {
     throw new Error("Order items are required and must be an array");
   }
 
-  const tyreIds = orderItems.map(item => item.tyre);
-  const invalidIds = tyreIds.filter(id => !mongoose.Types.ObjectId.isValid(id));
-  
+  const tyreIds = orderItems.map((item) => item.tyre);
+  const invalidIds = tyreIds.filter(
+    (id) => !mongoose.Types.ObjectId.isValid(id)
+  );
+
   if (invalidIds.length > 0) {
-    throw new Error(`Invalid tyre ID format: ${invalidIds.join(', ')}`);
+    throw new Error(`Invalid tyre ID format: ${invalidIds.join(", ")}`);
   }
 
   // Only check if tyres exist, don't validate stock
   const tyres = await addtyre.find({ _id: { $in: tyreIds }, deleted: false });
   console.log(tyres);
   if (tyres.length !== tyreIds.length) {
-    const foundIds = tyres.map(tyre => tyre._id.toString());
-    const missingIds = tyreIds.filter(id => !foundIds.includes(id));
-    throw new Error(`Some tyres do not exist or are deleted: ${missingIds.join(', ')}`);
+    const foundIds = tyres.map((tyre) => tyre._id.toString());
+    const missingIds = tyreIds.filter((id) => !foundIds.includes(id));
+    throw new Error(
+      `Some tyres do not exist or are deleted: ${missingIds.join(", ")}`
+    );
   }
 
   for (const item of orderItems) {
     if (!item.quantity || item.quantity < 1) {
       throw new Error("Quantity must be at least 1 for all items");
     }
-    
+
     if (!item.size) {
       throw new Error("Size is required for all items");
     }
-    
+
     // No longer checking stock availability
     // Just verify the tyre exists
-    const tyre = tyres.find(t => t._id.toString() === item.tyre.toString());
+    const tyre = tyres.find((t) => t._id.toString() === item.tyre.toString());
     if (!tyre) continue;
-    
+
     // Check if the size exists in the tyre's stock but don't check quantity
-    const stockItem = tyre.stock.find(stock => stock.size === item.size);
+    const stockItem = tyre.stock.find((stock) => stock.size === item.size);
     if (!stockItem) {
-      throw new Error(`Size ${item.size} not found for ${tyre.brand} ${tyre.model}`);
+      throw new Error(
+        `Size ${item.size} not found for ${tyre.brand} ${tyre.model}`
+      );
     }
-    
+
     // Stock quantity check remove
     item.price = stockItem.price;
   }
@@ -83,13 +89,18 @@ const createTyreInfo = async (req, res) => {
 
     await validateOrderItems(orderItems);
 
+    const totalPrice = orderItems.reduce((total, item) => {
+      return total + item.price * item.quantity;
+    }, 0);
+
     const newTyreInfo = new TyreInfo({
       userId: req.user.userId,
       orderItems: orderItems,
       status: req.body.status || "Pending",
       clientType: clientType,
+      totalPrice: totalPrice,
     });
-    
+
     const savedTyreInfo = await newTyreInfo.save();
     res.status(201).json(savedTyreInfo);
   } catch (error) {
@@ -176,14 +187,14 @@ const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    
+
     if (!status) {
       return res.status(400).json({ message: "Status is required" });
     }
-    
-    if (!['Pending', 'Completed', 'Issues'].includes(status)) {
-      return res.status(400).json({ 
-        message: "Invalid status. Must be one of: Pending, Completed, Issues" 
+
+    if (!["Pending", "Completed", "Issues"].includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status. Must be one of: Pending, Completed, Issues",
       });
     }
 
@@ -195,10 +206,10 @@ const updateOrderStatus = async (req, res) => {
 
     tyreInfo.status = status;
     const updatedTyreInfo = await tyreInfo.save();
-    
+
     res.status(200).json({
       message: "Order status updated successfully",
-      order: updatedTyreInfo
+      order: updatedTyreInfo,
     });
   } catch (error) {
     console.log("error:", error.message);

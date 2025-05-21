@@ -22,11 +22,11 @@ const OrderItemSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 1,
-      default: 1
+      default: 1,
     },
     price: {
       type: Number,
-      required: true
+      required: true,
     },
   },
   { _id: false }
@@ -40,6 +40,10 @@ const TyreInfoSchema = new mongoose.Schema(
       required: true,
     },
     orderItems: [OrderItemSchema],
+    totalPrice: {
+      type: Number,
+      default: 0,
+    },
     status: {
       type: String,
       enum: ["Pending", "Completed", "Approved", "Rejected"],
@@ -56,10 +60,18 @@ const TyreInfoSchema = new mongoose.Schema(
       enum: ["enterprice", "individual", "notmention"],
       default: "notmention",
       required: true,
-    }
+    },
   },
   { timestamps: true }
 );
+
+// Pre-save middleware to calculate totalPrice
+TyreInfoSchema.pre("save", function (next) {
+  this.totalPrice = this.orderItems.reduce((total, item) => {
+    return total + item.price * item.quantity;
+  }, 0);
+  next();
+});
 
 const TyreInfo = mongoose.model("ClientOrder", TyreInfoSchema);
 
