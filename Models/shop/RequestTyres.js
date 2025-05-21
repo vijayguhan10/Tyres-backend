@@ -33,7 +33,7 @@ const TyreRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Pending", "Approved", "Rejected"],
+      enum: ["Pending", "Approved", "Rejected", "fitment-push"],
       default: "Pending",
       required: true,
     },
