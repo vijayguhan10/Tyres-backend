@@ -24,6 +24,7 @@ app.use(
       "http://localhost:5174",
       "https://revozen-partner.vercel.app",
       "https://revozen-admin1.vercel.app",
+      "https://revozen-carwash.vercel.app",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -35,8 +36,7 @@ app.use(
 );
 app.get("/awshelath", (req, res) => {
   res.status(200).send("<h1>Aws Health Check</h1>");
-}
-);
+});
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRoutes);
 app.use("/api/address", AddressRoutes);
