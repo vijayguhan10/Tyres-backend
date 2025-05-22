@@ -161,10 +161,49 @@ const postReviewToShop = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+// Get all orders for a shop, destructured
+const getAllOrdersForShop = async (req, res) => {
+  console.log("getAllOrdersForShop called");
+  try {
+    const { userId } = req.user;
+    console.log("User ID:", userId);
+    // Validate userId is a valid ObjectId
+    if (!userId || !require('mongoose').Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
+
+    const shop = await Shop.findOne({ userId })
+      .populate('orders.orderId', 'name email phoneNumber')
+      .exec();
+    
+    if (!shop) {
+      return res.status(404).json({ message: "Shop not found" });
+    }
+
+    // Return all orders, each order fully destructured with populated user info
+    return res.status(200).json({
+      orders: shop.orders.map(order => ({
+        _id: order._id,
+        appointmentDate: order.appointmentDate,
+        appointmentTime: order.appointmentTime,
+        orderId: order.orderId,
+        status: order.status,
+   
+      }))
+    });
+  } catch (error) {
+    console.error('Error in getAllOrdersForShop:', error);
+    return res.status(500).json({ 
+      message: "An error occurred while fetching orders",
+      error: error.message 
+    });
+  }
+};
 module.exports = {
   getShopById,
   placeOrderToShop,
   postReviewToShop,
   addOrderToShop,
   changeOrderStatus,
+  getAllOrdersForShop, // <-- Add this to exports
 };
