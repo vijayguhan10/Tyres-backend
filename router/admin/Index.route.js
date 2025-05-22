@@ -10,6 +10,7 @@ const Carwash = require("./Carwash.route");
 const report = require("./Report.route");
 const OrderSummaryByShop = require("./OrderSummaryByShop.route");
 const OrderSummaryByDate = require("./OrderSummaryByDate.route");
+const summaryRoutes = require('./summary/index.route');
 const route = express.Router();
 console.log("Index route");
 route.use("/addtyre", authenticateJWT, AddtyreRoutes);
@@ -36,5 +37,6 @@ route.use(
   rolecheck("admin"),
   OrderSummaryByDate
 );
+route.use('/summary', authenticateJWT, rolecheck("admin"), summaryRoutes);
 
 module.exports = route;
