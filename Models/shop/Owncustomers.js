@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const OrderItemSchema = new mongoose.Schema(
   {
     tyreid: {
@@ -17,7 +18,6 @@ const OrderItemSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 1,
-      default: 1,
     },
     vehicleNumber: {
       type: String,
@@ -30,24 +30,21 @@ const OrderItemSchema = new mongoose.Schema(
   },
   { _id: false }
 );
-const OrderHistorySchema = new mongoose.Schema(
-  {
-    items: {
-      type: [OrderItemSchema], // CHANGED: 1D array of items
-      required: true,
-    },
-    totalAmount: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    orderDate: {
-      type: Date,
-      default: Date.now,
-    },
+
+const OrderHistorySchema = new mongoose.Schema({
+  items: {
+    type: [OrderItemSchema],
+    required: true,
   },
-  { _id: true }
-);
+  totalAmount: {
+    type: Number,
+    required: true,
+  },
+  orderDate: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
 const OwnCustomerSchema = new mongoose.Schema(
   {
@@ -71,16 +68,17 @@ const OwnCustomerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
     orderHistory: {
-      timestamps: true,
       type: [OrderHistorySchema],
       default: [],
+    },
+    totalamount: {
+      type: Number,
+      required: true,
+      default: 0,
     },
   },
   { timestamps: true }
 );
 
-const OwnCustomer = mongoose.model("fitmentclient", OwnCustomerSchema);
-
-module.exports = OwnCustomer;
+module.exports = mongoose.model("fitmentclient", OwnCustomerSchema);

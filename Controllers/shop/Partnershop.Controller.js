@@ -100,7 +100,26 @@ const GetShopStocks = async (req, res) => {
     }
 
     // Return only the shopStocks data
-    res.status(200).json({ shopStocks: shop.ShopStocks });
+    await shop.populate({
+      path: 'ShopStocks.tyreId',
+      model: 'addtyre',
+      select: 'brand model type vehicleType loadIndex speedRating price'
+    });
+
+    const formattedShopStocks = shop.ShopStocks.map(stock => ({
+      tyreId: stock.tyreId?._id,
+      tyreDetails: stock.tyreId ? {
+        brand: stock.tyreId.brand,
+        model: stock.tyreId.model,
+        type: stock.tyreId.type,
+        vehicleType: stock.tyreId.vehicleType,
+        
+        price: stock.tyreId.price
+      } : null,
+      sizes: stock.sizes
+    }));
+
+    res.status(200).json({ shopStocks: formattedShopStocks });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ message: "Internal server error" });
@@ -156,7 +175,14 @@ const GetOrdersAssigned = async (req, res) => {
     console.log("userid : ", userid);
 
     // Step 1: Find the shop and deeply populate appointment details
-    const shop = await Shop.findOne({ userId: userid }).populate({
+    const shop = await Shop.findOne({ userId: userid });
+    
+    if (!shop) {
+      return res.status(404).json({ message: "Shop not found" });
+    }
+
+    // Populate orders only if shop exists
+    await shop.populate({
       path: "orders.orderId",
       model: "Appointment",
       populate: [
@@ -173,10 +199,6 @@ const GetOrdersAssigned = async (req, res) => {
         },
       ],
     });
-    // Step 2: Error handling if shop or orders not found
-    if (!shop) {
-      return res.status(404).json({ message: "Shop not found" });
-    }
 
     if (!shop.orders || shop.orders.length === 0) {
       return res.status(404).json({ message: "No orders found" });
@@ -187,16 +209,17 @@ const GetOrdersAssigned = async (req, res) => {
     const completedOrders = [];
 
     for (const order of shop.orders) {
+      if (!order.orderId) continue; 
+      
+      const orderObj = {
+        ...order.toObject(),
+        appointmentId: order.orderId._id,
+      };
+
       if (order.status === "pending") {
-        pendingOrders.push({
-          ...order.toObject(),
-          appointmentId: order.orderId._id, // Include appointment ID
-        });
+        pendingOrders.push(orderObj);
       } else if (order.status === "completed") {
-        completedOrders.push({
-          ...order.toObject(),
-          appointmentId: order.orderId._id, // Include appointment ID
-        });
+        completedOrders.push(orderObj);
       }
     }
 
@@ -212,6 +235,7 @@ const GetOrdersAssigned = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 const completeorder = async (req, res) => {
   try {
     const userid = req.user.userId;
@@ -226,9 +250,14 @@ const completeorder = async (req, res) => {
       return res.status(404).json({ message: "Shop not found" });
     }
 
+    // Validate orderid and appointmentid
+    if (!orderid || !appointmentid) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     // Find and update order status in shop
     const orderIndex = shop.orders.findIndex(
-      (order) => order.orderId.toString() === orderid
+      (order) => order.orderId && order.orderId.toString() === orderid
     );
     if (orderIndex === -1) {
       return res.status(404).json({ message: "Order not found in shop" });
