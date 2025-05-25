@@ -24,7 +24,8 @@ const createVehicle = async (req, res) => {
 // Get all vehicles
 const getAllVehicles = async (req, res) => {
   try {
-    const vehicles = await AddVehicle.find();
+    const { userId } = req.user;
+    const vehicles = await AddVehicle.find({ userId });
     res.json(vehicles);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -34,7 +35,8 @@ const getAllVehicles = async (req, res) => {
 // Get a single vehicle by ID
 const getVehicleById = async (req, res) => {
   try {
-    const vehicle = await AddVehicle.findById(req.params.id);
+    const { userId } = req.user;
+    const vehicle = await AddVehicle.findOne({ _id: req.params.id, userId });
     if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
     res.json(vehicle);
   } catch (err) {
@@ -45,11 +47,10 @@ const getVehicleById = async (req, res) => {
 // Update a vehicle
 const updateVehicle = async (req, res) => {
   try {
-    const { registrationNumber, vehicleType, vehicleModel, servicesDone } =
-      req.body;
-
-    const updatedVehicle = await AddVehicle.findByIdAndUpdate(
-      req.params.id,
+    const { registrationNumber, vehicleType, vehicleModel, servicesDone } = req.body;
+    const { userId } = req.user;
+    const updatedVehicle = await AddVehicle.findOneAndUpdate(
+      { _id: req.params.id, userId },
       {
         ...(registrationNumber && { registrationNumber }),
         ...(vehicleType && { vehicleType }),
@@ -58,10 +59,8 @@ const updateVehicle = async (req, res) => {
       },
       { new: true, runValidators: true }
     );
-
     if (!updatedVehicle)
       return res.status(404).json({ error: "Vehicle not found" });
-
     res.json(updatedVehicle);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -71,7 +70,8 @@ const updateVehicle = async (req, res) => {
 // Delete a vehicle
 const deleteVehicle = async (req, res) => {
   try {
-    const deletedVehicle = await AddVehicle.findByIdAndDelete(req.params.id);
+    const { userId } = req.user;
+    const deletedVehicle = await AddVehicle.findOneAndDelete({ _id: req.params.id, userId });
     if (!deletedVehicle)
       return res.status(404).json({ error: "Vehicle not found" });
     res.json({ message: "Vehicle deleted successfully" });
