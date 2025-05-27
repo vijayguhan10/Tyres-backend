@@ -27,7 +27,7 @@ app.use(
       "https://revozen-carwash.vercel.app",
     ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     exposedHeaders: ["set-cookie"],
 
     allowedHeaders: ["Content-Type", "Authorization", "x-app-type"],

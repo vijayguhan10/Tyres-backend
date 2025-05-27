@@ -33,6 +33,10 @@ const ShopSchema = new mongoose.Schema(
           enum: ["pending", "completed", "rejected"],
           default: "pending",
         },
+    price: {
+      type: Number,
+      default: 0,
+    },
       },
     ],
     description: {

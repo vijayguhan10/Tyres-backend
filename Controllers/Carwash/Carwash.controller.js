@@ -3,7 +3,8 @@ const Shop = require("../../Models/Carwash/Shop");
 // Get a shop by ID
 const getShopById = async (req, res) => {
   try {
-    const shop = await Shop.findById(req.params.id);
+    const { userId } = req.user;
+    const shop = await Shop.findOne({ userId });
     if (!shop) {
       return res.status(404).json({ message: "Shop not found" });
     }
@@ -32,12 +33,15 @@ const addOrderToShop = async (req, res) => {
 // Change the status of an order in a shop
 const changeOrderStatus = async (req, res) => {
   try {
-    const { shopId, orderId, status } = req.body;
-    const shop = await Shop.findById(shopId);
+    const { userId } = req.user;
+    
+    const { orderId, status } = req.body;
+    console.log("request boyd of the app : ",req.body)
+    const shop = await Shop.findOne({ userId: userId });
     if (!shop) {
       return res.status(404).json({ message: "Shop not found" });
     }
-    const order = shop.orders.find((o) => o.orderId.toString() === orderId);
+    const order = shop.orders.find((o) => o._id.toString() === orderId);
     if (!order) {
       return res.status(404).json({ message: "Order not found in shop" });
     }
@@ -98,7 +102,7 @@ const placeOrderToShop = async (req, res) => {
     const newOrderId = updatedShop.orders[updatedShop.orders.length - 1]._id;
 
     return res.status(200).json({
-      orderid: newOrderId
+      orderid: newOrderId,
     });
   } catch (error) {
     console.error("Error placing order:", error);
@@ -168,35 +172,52 @@ const getAllOrdersForShop = async (req, res) => {
     const { userId } = req.user;
     console.log("User ID:", userId);
     // Validate userId is a valid ObjectId
-    if (!userId || !require('mongoose').Types.ObjectId.isValid(userId)) {
+    if (!userId || !require("mongoose").Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ message: "Invalid user ID format" });
     }
 
     const shop = await Shop.findOne({ userId })
-      .populate('orders.orderId', 'name email phoneNumber')
+      .populate("orders.orderId", "name email phoneNumber")
       .exec();
-    
+
     if (!shop) {
       return res.status(404).json({ message: "Shop not found" });
     }
 
     // Return all orders, each order fully destructured with populated user info
     return res.status(200).json({
-      orders: shop.orders.map(order => ({
+      orders: shop.orders.map((order) => ({
         _id: order._id,
         appointmentDate: order.appointmentDate,
         appointmentTime: order.appointmentTime,
         orderId: order.orderId,
         status: order.status,
-   
-      }))
+      })),
     });
   } catch (error) {
-    console.error('Error in getAllOrdersForShop:', error);
-    return res.status(500).json({ 
+    console.error("Error in getAllOrdersForShop:", error);
+    return res.status(500).json({
       message: "An error occurred while fetching orders",
-      error: error.message 
+      error: error.message,
     });
+  }
+};
+const updateShop = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    if (!userId) {
+      return res.status(404).json({ message: "User Dosent Exist" });
+    }
+    const shop = await Shop.findOneAndUpdate({ userId: userId }, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!shop) {
+      return res.status(404).json({ message: "Shop not found" });
+    }
+    res.status(200).json(shop);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
 module.exports = {
@@ -205,5 +226,6 @@ module.exports = {
   postReviewToShop,
   addOrderToShop,
   changeOrderStatus,
-  getAllOrdersForShop, // <-- Add this to exports
+  getAllOrdersForShop,
+  updateShop,
 };
