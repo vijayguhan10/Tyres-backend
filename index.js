@@ -25,6 +25,7 @@ app.use(
       "https://revozen-partner.vercel.app",
       "https://revozen-admin1.vercel.app",
       "https://revozen-carwash.vercel.app",
+      "http://alb-673665962.ap-south-1.elb.amazonaws.com",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
