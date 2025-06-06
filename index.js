@@ -38,6 +38,7 @@ app.use(
 app.get("/awshelath", (req, res) => {
   res.status(200).send("<h1>Aws Health Check</h1>");
 });
+// console.log("h1");
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRoutes);
 app.use("/api/address", AddressRoutes);
