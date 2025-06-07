@@ -107,20 +107,13 @@ const getAllTyres = async (req, res) => {
         { model: searchRegex },
         { _id: mongoose.Types.ObjectId.isValid(search) ? search : undefined },
         { "stock.size": searchRegex },
-      ].filter(Boolean); 
+      ].filter(Boolean);
     }
 
     const tyres = await Tyre.find(query).skip(skip).limit(limit);
     const total = await Tyre.countDocuments(query);
 
-    res.status(200).json({
-      message: "All tyres fetched successfully",
-      data: tyres,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-      totalItems: total,
-    });
+    res.status(200).json(tyres);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
