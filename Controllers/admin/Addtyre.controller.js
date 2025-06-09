@@ -137,8 +137,41 @@ const getTyreById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+const getAllTyresFormWebPannels = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skip = (page - 1) * limit;
+    const search = req.query.search ? req.query.search.trim() : "";
+    console.log("Search query:", search);
+    let query = { deleted: { $ne: true } };
 
-// PUT /api/tyres/:id
+    if (search) {
+      const searchRegex = new RegExp(search, "i");
+      query.$or = [
+        { brand: searchRegex },
+        { model: searchRegex },
+        { _id: mongoose.Types.ObjectId.isValid(search) ? search : undefined },
+        { "stock.size": searchRegex },
+      ].filter(Boolean); 
+    }
+
+    const tyres = await Tyre.find(query).skip(skip).limit(limit);
+    const total = await Tyre.countDocuments(query);
+
+    res.status(200).json({
+      message: "All tyres fetched successfully",
+      data: tyres,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const updateTyre = async (req, res) => {
   const { id } = req.params;
 
@@ -184,6 +217,7 @@ const deleteTyre = async (req, res) => {
 module.exports = {
   createTyre,
   getAllTyres,
+  getAllTyresFormWebPannels,
   getTyreById,
   AddNewStocks,
   updateTyre,

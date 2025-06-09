@@ -5,7 +5,8 @@ const {
   getTyreById,
   updateTyre,
   deleteTyre,
-  AddNewStocks
+  AddNewStocks,
+  getAllTyresFormWebPannels,
 } = require("../../Controllers/admin/Addtyre.controller");
 
 const router = express.Router();
@@ -14,6 +15,7 @@ const router = express.Router();
 router.post("/", createTyre);
 router.post("/edit", AddNewStocks);
 router.get("/", getAllTyres);
+router.get("/webpannels", getAllTyresFormWebPannels);
 router.get("/:id", getTyreById);
 router.put("/:id", updateTyre);
 router.delete("/:id", deleteTyre);
