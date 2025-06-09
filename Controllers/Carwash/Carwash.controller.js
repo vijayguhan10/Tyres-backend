@@ -183,8 +183,8 @@ const getAllOrdersForShop = async (req, res) => {
     if (!shop) {
       return res.status(404).json({ message: "Shop not found" });
     }
-
-    // Return all orders, each order fully destructured with populated user info
+    console.log("shop found:", shop);
+  console.log("shop orders:", shop.orders);
     return res.status(200).json({
       orders: shop.orders.map((order) => ({
         _id: order._id,
@@ -193,6 +193,7 @@ const getAllOrdersForShop = async (req, res) => {
         orderId: order.orderId,
         status: order.status,
       })),
+
     });
   } catch (error) {
     console.error("Error in getAllOrdersForShop:", error);

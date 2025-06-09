@@ -73,13 +73,39 @@ exports.deleteTyreRequest = async (req, res) => {
     res.status(500).json({ error: "Error deleting request" });
   }
 };
-exports.getTyreInfo = async (req, res) => {
+exports. getTyreInfo = async (req, res) => {
+
   try {
-    const Alltyres = await Tyres.find().lean();
-    console.log("Alltyres", Alltyres);
-    if (!Alltyres) return res.status(404).json({ error: "Tyre not found" });
-    res.status(200).json(Alltyres);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skip = (page - 1) * limit;
+    const search = req.query.search ? req.query.search.trim() : "";
+    console.log("Search query:", search);
+    let query = { deleted: { $ne: true } };
+
+    if (search) {
+      const searchRegex = new RegExp(search, "i");
+      query.$or = [
+        { brand: searchRegex },
+        { model: searchRegex },
+        { _id: mongoose.Types.ObjectId.isValid(search) ? search : undefined },
+        { "stock.size": searchRegex },
+      ].filter(Boolean); 
+    }
+
+    const tyres = await Tyres.find(query).skip(skip).limit(limit);
+    const total = await Tyres.countDocuments(query);
+
+    res.status(200).json({
+      message: "All tyres fetched successfully",
+      data: tyres,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching tyre" });
+    res.status(500).json({ message: error.message });
   }
 };
+
