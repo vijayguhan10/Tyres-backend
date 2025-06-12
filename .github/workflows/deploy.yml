@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /path/to/your/project
+            cd /home/ubuntu/Tyres-backend
             git pull origin main
             npm install
             pm2 restart all
@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "✅ Backend Deploy Success"
-          to: your@email.com
+          to: "vijayguhan10@gmail.com"
           from: ${{ secrets.EMAIL_USERNAME }}
           body: "Deployment to EC2 was successful!"
 
@@ -47,6 +47,6 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "❌ Backend Deploy Failed"
-          to: your@email.com
+          to: "vijayguhan10@gmail.com"
           from: ${{ secrets.EMAIL_USERNAME }}
           body: "Deployment to EC2 failed. Please check the workflow logs."
