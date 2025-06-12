@@ -21,7 +21,6 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            set -e
             echo "Deploy started at $(date)" > deploy-log.txt
             cd /home/ubuntu/Tyres-backend
 
@@ -38,13 +37,8 @@ jobs:
             # Install dependencies
             npm install >> deploy-log.txt 2>&1
 
-            # Start or restart PM2 process
-            pm2 describe tyres-backend > /dev/null
-            if [ $? -ne 0 ]; then
-              pm2 start index.js --name tyres-backend >> deploy-log.txt 2>&1
-            else
-              pm2 restart tyres-backend >> deploy-log.txt 2>&1
-            fi
+            # Restart PM2 using process id 0
+            pm2 restart 0 >> deploy-log.txt 2>&1 || echo "PM2 restart failed" >> deploy-log.txt
 
             pm2 save >> deploy-log.txt 2>&1
             echo "Deployment completed at $(date)" >> deploy-log.txt
@@ -62,11 +56,12 @@ jobs:
           from: ${{ secrets.EMAIL_USERNAME }}
           body: |
             ✅ Deployment to EC2 succeeded!
-            Branch: main
-            Repo: ${{ github.repository }}
-            Commit: ${{ github.sha }}
-            Actor: ${{ github.actor }}
-            Time: ${{ github.event.head_commit.timestamp }}
+
+            🔹 Repo: ${{ github.repository }}
+            🔹 Branch: main
+            🔹 Commit: ${{ github.sha }}
+            🔹 Actor: ${{ github.actor }}
+            🔹 Time: ${{ github.event.head_commit.timestamp }}
 
       - name: Send failure email with logs
         if: failure()
@@ -82,11 +77,11 @@ jobs:
           body: |
             ❌ Deployment to EC2 failed.
 
-            Repo: ${{ github.repository }}
-            Branch: main
-            Commit: ${{ github.sha }}
-            Actor: ${{ github.actor }}
-            Time: ${{ github.event.head_commit.timestamp }}
+            🔹 Repo: ${{ github.repository }}
+            🔹 Branch: main
+            🔹 Commit: ${{ github.sha }}
+            🔹 Actor: ${{ github.actor }}
+            🔹 Time: ${{ github.event.head_commit.timestamp }}
 
-            Check the GitHub Actions logs for full error details:
+            🔍 Check the full log here:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
