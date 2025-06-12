@@ -47,7 +47,7 @@ app.use("/api/admin", AdminRouter);
 app.use("/api", ShopRouter);
 app.use("/api", carwashRoutes);
 app.use(morgan("dev"));
-console.log("h");
+// console.log("h");
 ConnectDb();
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
