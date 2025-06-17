@@ -12,6 +12,9 @@ const OrderSummaryByShop = require("./OrderSummaryByShop.route");
 const OrderSummaryByDate = require("./OrderSummaryByDate.route");
 const summaryRoutes = require('./summary/index.route');
 const route = express.Router();
+
+const  {handleQuery}  = require("../../Utils/Gpt");
+route.post("/query", handleQuery);
 console.log("Index route");
 route.use("/addtyre", authenticateJWT, AddtyreRoutes);
 route.use("/mapping", authenticateJWT, rolecheck("admin"), MappingRoutes);
