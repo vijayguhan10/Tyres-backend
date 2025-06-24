@@ -11,7 +11,6 @@ router.post(
   tyreRequestController.updateOrderStatuses, 
   tyreRequestController.finalResponse 
 );
-// Chained endpoints
 router.post(
   "/adminassign/reducetyres",
   async (req, res, next) => {

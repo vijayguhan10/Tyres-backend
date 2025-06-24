@@ -3,6 +3,7 @@ const Tyre = require("../../Models/admin/Addtyre");
 const Shop = require("../../Models/shop/Shop");
 const clientOrder = require("../../Models/client/OrderTyre");
 const Appointment = require("../../Models/client/Appointment");
+const { sendNotificationEmail } = require("../../Utils/Email");
 
 exports.createTyreRequest = async (req, res, next) => {
   try {
@@ -215,6 +216,12 @@ exports.updateOrderStatuses = async (req, res, next) => {
 };
 
 exports.finalResponse = async (req, res) => {
+  sendNotificationEmail(
+    "Tyre Request Processed",
+    `A tyre request has been processed successfully. Details: ${JSON.stringify(
+      req.tyreRequestData.tyreRequest
+    )}`
+  );
   try {
     const { tyreRequest } = req.tyreRequestData;
     console.log("reached final response");

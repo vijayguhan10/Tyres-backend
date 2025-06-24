@@ -24,21 +24,19 @@ jobs:
             echo "Deploy started at $(date)" > deploy-log.txt
             cd /home/ubuntu/Tyres-backend
 
-            # Fix GIT safe directory issue
             git config --global --add safe.directory /home/ubuntu/Tyres-backend
             echo "Git config done" >> deploy-log.txt
 
-            # Pull latest changes
             git pull origin main >> deploy-log.txt 2>&1
-
-            # Fix permissions
             sudo chown -R ubuntu:ubuntu /home/ubuntu/Tyres-backend >> deploy-log.txt 2>&1
-
-            # Install dependencies
             npm install >> deploy-log.txt 2>&1
 
-            # Restart PM2 using process id 0
-            pm2 restart 0 >> deploy-log.txt 2>&1 || echo "PM2 restart failed" >> deploy-log.txt
+            # Start or restart PM2 process for index.js
+            if pm2 list | grep -q "index"; then
+              pm2 restart 0 >> deploy-log.txt 2>&1
+            else
+              pm2 start index.js --name index >> deploy-log.txt 2>&1
+            fi
 
             pm2 save >> deploy-log.txt 2>&1
             echo "Deployment completed at $(date)" >> deploy-log.txt

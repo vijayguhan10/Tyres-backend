@@ -46,7 +46,6 @@ Instructions:
 
   console.log("RAW GEMINI API (Extract Query) RESPONSE:\n", rawResponse.trim());
 
-  // Parse the raw Gemini API response
   const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/);
   const jsonString = jsonMatch ? jsonMatch[1].trim() : rawResponse.trim();
 
