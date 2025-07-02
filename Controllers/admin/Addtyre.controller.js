@@ -174,6 +174,7 @@ const getAllTyresFormWebPannels = async (req, res) => {
 
 const updateTyre = async (req, res) => {
   const { id } = req.params;
+  // console.log("Update tyre request body:", req.body);
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "Invalid tyre ID" });
