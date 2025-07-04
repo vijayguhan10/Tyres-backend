@@ -1,15 +1,16 @@
 const OptInUser = require("../../Models/communication/Optin");
 const Message = require("../../Models/communication/Messages");
 
-// Opt-In Save (from your API, not from Gupshup)
+// Opt-In Save (from your API, NOT webhook)
 exports.saveOptIn = async (req, res) => {
   try {
-    const { phoneNumber } = req.body;
+    const { phoneNumber, senderName } = req.body;
+
     if (!phoneNumber) return res.status(400).send("Phone number is required.");
 
     const user = await OptInUser.findOneAndUpdate(
       { phoneNumber },
-      { consent: true, optedInAt: new Date() },
+      { senderName: senderName || '', consent: true, optedInAt: new Date() },
       { upsert: true, new: true }
     );
 
@@ -20,33 +21,39 @@ exports.saveOptIn = async (req, res) => {
   }
 };
 
-// Webhook receiver from Gupshup
+// ✅ Webhook receiver from Gupshup (handles inbound messages)
 exports.receiveMessage = async (req, res) => {
   try {
     console.log("Incoming Webhook:", JSON.stringify(req.body, null, 2));
 
-    const { type, payload } = req.body;
+    const { app, timestamp, type, payload } = req.body;
 
     const messageData = {
       phoneNumber: payload?.source || "",
+      senderName: payload?.sender?.name || "",
       messageText: payload?.payload?.text || "",
       messageType: payload?.type || type,
       messageId: payload?.id || "",
-      externalMessageId: payload?.externalMessageId || "",
-      eventType: payload?.event || type,
-      timestamp: new Date(payload?.timestamp || Date.now()),
+      contextId: payload?.context?.id || "",
+      gsId: payload?.context?.gsId || "",
+      appName: app || "",
+      receivedAt: new Date(timestamp || Date.now()),
     };
 
-    // ✅ Respond IMMEDIATELY to Gupshup
-    res.status(200).send(); // Always send 200 OK with no body
+    // ✅ Respond immediately to Gupshup
+    res.status(200).send();
 
-    // Then save asynchronously (fire and forget)
-    Message.create(messageData).catch(err => {
-      console.error("Error saving message:", err);
-    });
+    // Save asynchronously
+    await Message.create(messageData);
+
+    // ✅ Optional: Save the sender as opted-in user (auto opt-in on message)
+    await OptInUser.findOneAndUpdate(
+      { phoneNumber: messageData.phoneNumber },
+      { senderName: messageData.senderName, consent: true, optedInAt: new Date() },
+      { upsert: true, new: true }
+    );
   } catch (err) {
     console.error(err);
-    // Even on error, respond 200 OK to prevent Gupshup retries
-    res.status(200).send();
+    res.status(200).send(); // Always respond 200 to avoid retries
   }
 };
