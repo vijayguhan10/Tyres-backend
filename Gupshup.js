@@ -2,7 +2,7 @@ const axios = require("axios");
 const { URLSearchParams } = require("url");
 
 const SOURCE_NUMBER = "15557940575"; // Your Gupshup WABA number
-const DESTINATION_NUMBER = "918438434868"; // User's phone number
+const DESTINATION_NUMBER = "918072563091"; // User's phone number
 
 // Free text message (supports bold using * symbols and newlines with \n)
 const messagePayload = {

@@ -1,10 +1,10 @@
 const OptInUser = require("../../Models/communication/Optin");
 const Message = require("../../Models/communication/Messages");
 
+// Opt-In Save (from your API, not from Gupshup)
 exports.saveOptIn = async (req, res) => {
   try {
     const { phoneNumber } = req.body;
-
     if (!phoneNumber) return res.status(400).send("Phone number is required.");
 
     const user = await OptInUser.findOneAndUpdate(
@@ -20,6 +20,7 @@ exports.saveOptIn = async (req, res) => {
   }
 };
 
+// Webhook receiver from Gupshup
 exports.receiveMessage = async (req, res) => {
   try {
     console.log("Incoming Webhook:", JSON.stringify(req.body, null, 2));
@@ -36,11 +37,16 @@ exports.receiveMessage = async (req, res) => {
       timestamp: new Date(payload?.timestamp || Date.now()),
     };
 
-    await Message.create(messageData);
+    // ✅ Respond IMMEDIATELY to Gupshup
+    res.status(200).send(); // Always send 200 OK with no body
 
-    res.status(200).send("Message saved successfully");
+    // Then save asynchronously (fire and forget)
+    Message.create(messageData).catch(err => {
+      console.error("Error saving message:", err);
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error saving message");
+    // Even on error, respond 200 OK to prevent Gupshup retries
+    res.status(200).send();
   }
 };
